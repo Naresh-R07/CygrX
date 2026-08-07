@@ -120,5 +120,6 @@ export type ViewTab =
   | "assets"
   | "evidence"
   | "incidents"
+  | "integrations"
   | "ai-advisor"
   | "executive-report";

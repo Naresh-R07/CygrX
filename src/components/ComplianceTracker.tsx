@@ -64,28 +64,31 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
     <div className="space-y-6 font-sans">
       
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 cyber-card p-6 rounded-3xl relative overflow-hidden">
         <div className="flex items-center gap-4">
-          <div className={`p-3.5 rounded-2xl border ${isIso ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"}`}>
+          <div className={`p-3.5 rounded-2xl border ${isIso ? "bg-emerald-950/80 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)]" : "bg-violet-950/80 border-violet-500/40 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.25)]"}`}>
             {isIso ? <ShieldCheck className="w-8 h-8" /> : <CheckSquare className="w-8 h-8" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">FRAMEWORK CONTROLS</span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+              <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping" />
+                FRAMEWORK COMPLIANCE ENGINE
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-950/80 text-violet-300 border border-violet-500/30 font-mono">
                 {isIso ? "Annex A (2022)" : "NIST CSF 2.0"}
               </span>
             </div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight font-mono mt-0.5">{title}</h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl">{subtitle}</p>
+            <h1 className="text-xl font-extrabold text-white tracking-tight font-mono mt-0.5 text-gradient-violet">{title}</h1>
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl font-mono">{subtitle}</p>
           </div>
         </div>
 
         {/* Readiness Gauge */}
-        <div className="flex items-center gap-4 bg-slate-950/90 border border-slate-800 px-5 py-3 rounded-2xl">
+        <div className="flex items-center gap-4 bg-slate-950/90 border border-violet-900/30 px-5 py-3 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
           <div className="text-right font-mono">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">OVERALL READINESS</span>
-            <span className="text-2xl font-extrabold text-white">{readinessPercentage}%</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">AUDIT READINESS</span>
+            <span className="text-2xl font-black text-white drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]">{readinessPercentage}%</span>
           </div>
           <div className="w-16 h-16 relative flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90">
@@ -94,12 +97,11 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
                 cx="32"
                 cy="32"
                 r="26"
-                stroke={isIso ? "#10b981" : "#6366f1"}
+                stroke={isIso ? "#10b981" : "#8b5cf6"}
                 strokeWidth="6"
                 strokeDasharray={163}
                 strokeDashoffset={163 - (163 * readinessPercentage) / 100}
                 strokeLinecap="round"
-                fill="transparent"
                 className="transition-all duration-1000 ease-out"
               />
             </svg>

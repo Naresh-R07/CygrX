@@ -166,6 +166,33 @@ Provide authoritative, concise, actionable advice with bullet points and standar
     res.json(reportData);
   });
 
+  // Real-time Server-Sent Events (SSE) Monitoring Endpoint for Live Security Telemetry
+  app.get("/api/stream/telemetry", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    // Send initial connection event
+    res.write(`data: ${JSON.stringify({ type: "INIT", message: "Real-time GRC stream connected", timestamp: new Date().toISOString() })}\n\n`);
+
+    // Stream live simulated security telemetry pulses every 5 seconds
+    const interval = setInterval(() => {
+      const events = [
+        { type: "METRIC_UPDATE", isoReadiness: 80, activeThreats: 2, status: "SYSTEM_OK" },
+        { type: "VULN_SCAN", target: "Kubernetes Cluster EKS-Prod-01", result: "CVE-2026-1940 detected", severity: "HIGH" },
+        { type: "COMPLIANCE_CHECK", control: "ISO 27001 A.8.8", status: "VERIFIED" },
+        { type: "LOG_EVENT", log: "Okta MFA verification pass rate: 99.8%", level: "INFO" }
+      ];
+      const randomEvent = events[Math.floor(Math.random() * events.length)];
+      res.write(`data: ${JSON.stringify({ ...randomEvent, timestamp: new Date().toISOString() })}\n\n`);
+    }, 5000);
+
+    req.on("close", () => {
+      clearInterval(interval);
+      res.end();
+    });
+  });
+
   // Vite middleware setup
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

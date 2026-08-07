@@ -87,15 +87,18 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
     <div className="space-y-6 font-sans">
       
       {/* Title & Top Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cyber-card p-6 rounded-3xl relative overflow-hidden">
         <div>
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">HEATMAP ENGINE</span>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 font-mono mt-0.5">
-            <Grid3X3 className="w-5 h-5 text-indigo-400" />
+          <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping" />
+            CYGRX THREAT HEATMAP ENGINE
+          </span>
+          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 font-mono mt-0.5 text-gradient-violet">
+            <Grid3X3 className="w-5 h-5 text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
             5x5 Risk Matrix & Threat Heatmap
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Dynamic enterprise risk calculation (Risk Score = Likelihood × Impact). Click any matrix cell to filter risks.
+          <p className="text-xs text-slate-300 mt-1 font-mono">
+            Enterprise threat severity matrix (Risk Score = Likelihood × Impact). Click matrix cells to filter active risk vectors.
           </p>
         </div>
 
@@ -103,45 +106,45 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
           {selectedCell && (
             <button
               onClick={() => setSelectedCell(null)}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold font-mono bg-slate-900 hover:bg-slate-800 text-violet-300 border border-violet-800 transition-all cursor-pointer"
             >
               Reset Cell Filter
             </button>
           )}
           <button
             onClick={onOpenNewRiskModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-950/50 border border-indigo-400/30 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.35)] border border-violet-400/40 transition-all cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            Add New Risk
+            Add Threat Risk
           </button>
         </div>
       </div>
 
       {/* 5x5 Heatmap Matrix Section */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <div className="cyber-card p-6 rounded-3xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-white">5x5 Enterprise Heatmap Grid</span>
-            <span className="text-xs text-slate-500">(Y-Axis: Likelihood | X-Axis: Impact)</span>
+            <span className="text-sm font-bold text-white font-mono">5x5 Enterprise Threat Matrix Grid</span>
+            <span className="text-xs text-slate-400 font-mono">(Y-Axis: Likelihood | X-Axis: Impact)</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500" />
-              <span className="text-slate-400">Low (1-4)</span>
+              <span className="w-3 h-3 rounded bg-cyan-500/30 border border-cyan-400" />
+              <span className="text-slate-300">Low (1-4)</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500" />
-              <span className="text-slate-400">Medium (5-9)</span>
+              <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-400" />
+              <span className="text-slate-300">Medium (5-9)</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-500" />
-              <span className="text-slate-400">High (10-15)</span>
+              <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-400" />
+              <span className="text-slate-300">High (10-15)</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-500" />
-              <span className="text-slate-400">Critical (16-25)</span>
+              <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-400" />
+              <span className="text-slate-300">Critical (16-25)</span>
             </div>
           </div>
         </div>

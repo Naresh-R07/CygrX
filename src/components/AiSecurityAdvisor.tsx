@@ -204,20 +204,22 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cyber-card p-6 rounded-3xl">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-950/50 border border-purple-400/30">
-            <Sparkles className="w-6 h-6" />
+          <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.35)] border border-violet-400/40">
+            <Sparkles className="w-6 h-6 animate-spin" style={{ animationDuration: '6s' }} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">AI Cybersecurity Lead Auditor</h1>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30">
-                Gemini 3.6 Flash Engine
+              <h1 className="text-xl font-black text-white tracking-tight font-mono text-gradient-violet">
+                AI Cyber Security Lead Auditor & SOC Advisor
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 font-mono">
+                Gemini AI Engine
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Context-aware security governance assistant trained on ISO 27001:2022, NIST CSF 2.0, SOC 2, and threat modeling.
+            <p className="text-xs text-slate-300 mt-1 font-mono">
+              Context-aware security governance assistant trained on ISO 27001:2022, NIST CSF 2.0, SOC 2 Type II, and real-time threat modeling.
             </p>
           </div>
         </div>
