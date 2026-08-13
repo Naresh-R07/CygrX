@@ -8,9 +8,7 @@ import {
   AlertCircle, 
   Clock, 
   Search, 
-  Link2,
-  ExternalLink,
-  ChevronRight
+  Link2
 } from "lucide-react";
 import { Control, ComplianceStatus, Evidence, FrameworkType } from "../types";
 
@@ -43,6 +41,12 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
   const partial = controls.filter((c) => c.status === "PARTIALLY_IMPLEMENTED").length;
   const notImplemented = controls.filter((c) => c.status === "NOT_IMPLEMENTED").length;
   const readinessPercentage = Math.round((implemented / total) * 100) || 0;
+
+  // Only count evidence linked to controls in THIS framework
+  const frameworkControlIds = new Set(controls.map((c) => c.id));
+  const linkedEvidenceCount = evidences.filter((ev) =>
+    ev.linkedControlIds.some((id) => frameworkControlIds.has(id))
+  ).length;
 
   // Filter controls
   const filteredControls = controls.filter((ctl) => {
@@ -140,7 +144,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
           <div>
             <span className="text-[11px] font-semibold text-slate-400 uppercase">Audit Evidence Attached</span>
             <span className="text-2xl font-extrabold text-cyan-400 block mt-1">
-              {evidences.length} Files
+              {linkedEvidenceCount} Files
             </span>
           </div>
           <FileText className="w-6 h-6 text-cyan-500/40" />

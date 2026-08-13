@@ -2,12 +2,8 @@ import React, { useState } from "react";
 import { 
   AlertOctagon, 
   PlusCircle, 
-  ShieldAlert, 
-  CheckCircle2, 
   Clock, 
   Search, 
-  AlertTriangle, 
-  FileText,
   X 
 } from "lucide-react";
 import { Incident, IncidentSeverity, IncidentStatus, Asset } from "../types";

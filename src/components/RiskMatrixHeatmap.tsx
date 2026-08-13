@@ -3,14 +3,7 @@ import {
   Grid3X3, 
   PlusCircle, 
   Search, 
-  Filter, 
-  Sparkles, 
-  AlertTriangle, 
-  ShieldAlert, 
-  CheckCircle2, 
-  FileText,
-  ChevronDown,
-  Info
+  Sparkles 
 } from "lucide-react";
 import { Risk, RiskLevel, RiskStatus } from "../types";
 import { calculateRiskScore, getHeatmapCellColor } from "../utils/riskEngine";
@@ -255,6 +248,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
               <option value="UNDER_REVIEW">Under Review</option>
               <option value="MITIGATED">Mitigated</option>
               <option value="ACCEPTED">Accepted</option>
+              <option value="TRANSFERRED">Transferred</option>
             </select>
 
             {/* Severity Level Filter */}
@@ -339,6 +333,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                           <option value="UNDER_REVIEW">Under Review</option>
                           <option value="MITIGATED">Mitigated</option>
                           <option value="ACCEPTED">Accepted</option>
+                          <option value="TRANSFERRED">Transferred</option>
                         </select>
                       </td>
 

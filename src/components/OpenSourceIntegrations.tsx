@@ -7,17 +7,11 @@ import {
   AlertTriangle, 
   Zap, 
   Activity, 
-  Database, 
-  ShieldAlert, 
-  Sliders, 
   Globe, 
   Cpu, 
-  Layers, 
   Code2, 
   Play, 
-  Check, 
-  ExternalLink,
-  Wifi
+  ExternalLink
 } from "lucide-react";
 
 export interface OpenSourceTool {
@@ -192,9 +186,10 @@ export const OpenSourceIntegrations: React.FC = () => {
   const [activeToolModal, setActiveToolModal] = useState<OpenSourceTool | null>(null);
   
   // Real-time SSE Telemetry state
-  const [sseEvents, setSseEvents] = useState<any[]>([]);
+  const [sseEvents, setSseEvents] = useState<Array<Record<string, unknown>>>([]);
   const [isSseConnected, setIsSseConnected] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [opaError, setOpaError] = useState<string | null>(null);
 
   // Policy-as-Code Rego Simulator State
   const [regoPolicy, setRegoPolicy] = useState<string>(
@@ -249,6 +244,9 @@ allow {
 
   const handleManualSync = (toolId: string) => {
     setSyncingId(toolId);
+    setTools((prev) =>
+      prev.map((t) => (t.id === toolId ? { ...t, status: "SYNCING" as const } : t))
+    );
     setTimeout(() => {
       setTools((prev) =>
         prev.map((t) =>
@@ -267,8 +265,13 @@ allow {
   };
 
   const handleEvaluateOpa = () => {
+    setOpaError(null);
     try {
       const parsedInput = JSON.parse(sampleInput);
+      if (!parsedInput?.asset) {
+        setOpaError("Invalid input payload: missing top-level \"asset\" object.");
+        return;
+      }
       const isAllowed = 
         parsedInput?.asset?.criticality === "CRITICAL" && 
         parsedInput?.asset?.unpatched_cve_count === 0 && 
@@ -279,14 +282,47 @@ allow {
         latencyMs: Math.round(Math.random() * 3 + 1), // ultra low latency 1-4ms
         evaluatedAt: new Date().toLocaleTimeString()
       });
-    } catch (e) {
-      alert("Invalid JSON format in OPA Input");
+    } catch {
+      setOpaError("Invalid JSON format in OPA Input. Please fix the syntax and try again.");
     }
   };
 
   const filteredTools = selectedCategory === "ALL" 
     ? tools 
     : tools.filter(t => t.category === selectedCategory);
+
+  const getStatusBadge = (status: OpenSourceTool["status"]) => {
+    switch (status) {
+      case "CONNECTED":
+        return {
+          label: "ACTIVE",
+          classes: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+          dot: "bg-emerald-400",
+          pulse: true,
+        };
+      case "SYNCING":
+        return {
+          label: "SYNCING",
+          classes: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+          dot: "bg-amber-400",
+          pulse: true,
+        };
+      case "ERROR":
+        return {
+          label: "ERROR",
+          classes: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+          dot: "bg-rose-400",
+          pulse: true,
+        };
+      default:
+        return {
+          label: "DISCONNECTED",
+          classes: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+          dot: "bg-slate-400",
+          pulse: false,
+        };
+    }
+  };
 
   return (
     <div className="space-y-6 font-sans text-slate-100">
@@ -402,7 +438,9 @@ allow {
 
       {/* Open Source Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredTools.map((tool) => (
+        {filteredTools.map((tool) => {
+          const statusBadge = getStatusBadge(tool.status);
+          return (
           <div
             key={tool.id}
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-5 rounded-2xl flex flex-col justify-between group transition-all"
@@ -431,9 +469,9 @@ allow {
                   </div>
                 </div>
 
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  ACTIVE
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border flex items-center gap-1 ${statusBadge.classes}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot} ${statusBadge.pulse ? "animate-pulse" : ""}`} />
+                  {statusBadge.label}
                 </span>
               </div>
 
@@ -472,7 +510,8 @@ allow {
               </button>
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {/* Interactive Policy-as-Code (OPA Rego) Live Engine */}
@@ -531,6 +570,14 @@ allow {
             />
           </div>
         </div>
+
+        {/* Evaluation Error */}
+        {opaError && (
+          <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 font-mono text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            {opaError}
+          </div>
+        )}
 
         {/* Evaluation Output Result */}
         {opaResult && (

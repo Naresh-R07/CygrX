@@ -3,21 +3,16 @@ import {
   ShieldCheck, 
   Sparkles, 
   PlusCircle, 
-  FileText, 
   Search, 
   Bell, 
   Globe,
   ChevronDown,
   Check,
   Plus,
-  Zap,
   Shield,
   Menu,
   PanelLeftClose,
-  PanelLeftOpen,
-  Monitor,
-  Smartphone,
-  Tablet
+  PanelLeftOpen
 } from "lucide-react";
 import { ViewTab } from "../types";
 

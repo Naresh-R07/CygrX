@@ -1,15 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { 
   Sparkles, 
   Send, 
   Bot, 
   User, 
-  ShieldCheck, 
-  FileCheck2, 
-  AlertTriangle, 
   Lightbulb, 
-  RotateCcw,
-  CheckCircle2
+  RotateCcw
 } from "lucide-react";
 import { ChatMessage, Risk, Control, Asset, Incident } from "../types";
 
@@ -50,7 +46,13 @@ How can I assist your security and governance team today?`,
 
   const [inputPrompt, setInputPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeModel, setActiveModel] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<ChatMessage[]>(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,14 +62,7 @@ How can I assist your security and governance team today?`,
     scrollToBottom();
   }, [messages]);
 
-  // Handle active targeted risk consultation
-  useEffect(() => {
-    if (activeTargetRisk) {
-      handleRequestRiskRecommendation(activeTargetRisk);
-    }
-  }, [activeTargetRisk]);
-
-  const handleRequestRiskRecommendation = async (targetRisk: Risk) => {
+  const handleRequestRiskRecommendation = useCallback(async (targetRisk: Risk) => {
     const userMsg: ChatMessage = {
       id: `usr-${Date.now()}`,
       role: "user",
@@ -96,6 +91,7 @@ How can I assist your security and governance team today?`,
       let botContent = "";
 
       if (data.success && data.recommendation) {
+        if (data.model) setActiveModel(data.model);
         const rec = data.recommendation;
         botContent = `### AI Security Recommendation for "${targetRisk.title}"
 
@@ -127,12 +123,28 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
         },
       ]);
     } catch (err) {
-      console.error(err);
+      console.error("AI Recommendation Error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `bot-err-${Date.now()}`,
+          role: "assistant",
+          content: "Encountered an issue contacting the Gemini recommendation engine. Please check your GEMINI_API_KEY configuration and try again.",
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
     } finally {
       setIsLoading(false);
       if (onClearTargetRisk) onClearTargetRisk();
     }
-  };
+  }, [onClearTargetRisk]);
+
+  // Handle active targeted risk consultation
+  useEffect(() => {
+    if (activeTargetRisk) {
+      handleRequestRiskRecommendation(activeTargetRisk);
+    }
+  }, [activeTargetRisk, handleRequestRiskRecommendation]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -151,12 +163,14 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
     setMessages((prev) => [...prev, newMsg]);
     setIsLoading(true);
 
+    const historySnapshot = messagesRef.current;
+
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, newMsg].map((m) => ({ role: m.role, content: m.content })),
+          messages: [...historySnapshot, newMsg].map((m) => ({ role: m.role, content: m.content })),
           contextData: {
             riskCount: risks.length,
             isoScore: Math.round((isoControls.filter(c => c.status === 'FULLY_IMPLEMENTED').length / isoControls.length) * 100),
@@ -168,6 +182,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
       });
 
       const data = await res.json();
+      if (data.model) setActiveModel(data.model);
       setMessages((prev) => [
         ...prev,
         {
@@ -216,6 +231,9 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 font-mono">
                 Gemini AI Engine
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono">
+                {activeModel} • 1M ctx
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-1 font-mono">

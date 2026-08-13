@@ -7,9 +7,6 @@ import {
   Building2, 
   PlusCircle, 
   Search, 
-  ShieldAlert, 
-  AlertTriangle, 
-  CheckCircle2, 
   Trash2,
   X 
 } from "lucide-react";
@@ -185,7 +182,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
                       {getAssetIcon(asset.type)}
                     </div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      {asset.type.replace("_", " ")}
+                      {asset.type.replaceAll("_", " ")}
                     </span>
                   </div>
 

@@ -33,6 +33,16 @@ import {
 } from "./types";
 import { calculateRiskScore } from "./utils/riskEngine";
 
+// Safely read + parse JSON from localStorage with graceful fallback
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? (JSON.parse(saved) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 // Helper for Realtime Viewport & Tab Aspect Ratio Detection
 function getViewportDetails() {
   const width = typeof window !== "undefined" ? window.innerWidth : 1280;
@@ -76,35 +86,17 @@ export default function App() {
   }, []);
 
   // GRC Core State with LocalStorage fallbacks
-  const [risks, setRisks] = useState<Risk[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_risks");
-    return saved ? JSON.parse(saved) : initialRisks;
-  });
+  const [risks, setRisks] = useState<Risk[]>(() => loadFromStorage<Risk[]>("aegis_grc_risks", initialRisks));
 
-  const [assets, setAssets] = useState<Asset[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_assets");
-    return saved ? JSON.parse(saved) : initialAssets;
-  });
+  const [assets, setAssets] = useState<Asset[]>(() => loadFromStorage<Asset[]>("aegis_grc_assets", initialAssets));
 
-  const [isoControls, setIsoControls] = useState<Control[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_iso");
-    return saved ? JSON.parse(saved) : initialIsoControls;
-  });
+  const [isoControls, setIsoControls] = useState<Control[]>(() => loadFromStorage<Control[]>("aegis_grc_iso", initialIsoControls));
 
-  const [nistControls, setNistControls] = useState<Control[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_nist");
-    return saved ? JSON.parse(saved) : initialNistControls;
-  });
+  const [nistControls, setNistControls] = useState<Control[]>(() => loadFromStorage<Control[]>("aegis_grc_nist", initialNistControls));
 
-  const [evidences, setEvidences] = useState<Evidence[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_evidences");
-    return saved ? JSON.parse(saved) : initialEvidences;
-  });
+  const [evidences, setEvidences] = useState<Evidence[]>(() => loadFromStorage<Evidence[]>("aegis_grc_evidences", initialEvidences));
 
-  const [incidents, setIncidents] = useState<Incident[]>(() => {
-    const saved = localStorage.getItem("aegis_grc_incidents");
-    return saved ? JSON.parse(saved) : initialIncidents;
-  });
+  const [incidents, setIncidents] = useState<Incident[]>(() => loadFromStorage<Incident[]>("aegis_grc_incidents", initialIncidents));
 
   // Modal and active selection states
   const [isRiskModalOpen, setIsRiskModalOpen] = useState(false);

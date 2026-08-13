@@ -1,20 +1,13 @@
 import React from "react";
 import { 
   ShieldAlert, 
-  CheckCircle2, 
   AlertTriangle, 
   Sparkles, 
-  Server, 
-  TrendingUp, 
   ArrowUpRight,
   ShieldCheck,
   FileCheck2,
   AlertOctagon,
-  ArrowRight,
-  Activity,
-  Zap,
-  Lock,
-  Cpu
+  ArrowRight
 } from "lucide-react";
 import { Asset, Control, Incident, Risk, ViewTab } from "../types";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";

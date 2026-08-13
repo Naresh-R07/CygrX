@@ -1,11 +1,28 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { generateWithFallback, resolveActiveModel, getMaxOutputTokens } from "./aiModels";
+
+// Project-defined model (metadata.json "aiModel") > env GEMINI_MODEL > registry default.
+function getProjectModelId(): string | undefined {
+  try {
+    const raw = fs.readFileSync(path.join(process.cwd(), "metadata.json"), "utf-8");
+    const meta = JSON.parse(raw);
+    return typeof meta.aiModel === "string" ? meta.aiModel : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Which model is active for this project (env var wins, then registry default)
+const ACTIVE_MODEL = resolveActiveModel(getProjectModelId());
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "10mb" }));
 
@@ -69,22 +86,39 @@ Please analyze and return a strictly formatted JSON object with the following fi
   "mitigationPriority": "Immediate (24 hours)" | "Short-term (7 days)" | "Medium-term (30 days)"
 }`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
-
-      const responseText = response.text || "{}";
       let parsed;
+      let usedModel = ACTIVE_MODEL;
       try {
-        parsed = JSON.parse(responseText);
-      } catch {
+        const { result: response, modelId } = await generateWithFallback(
+          (modelId) =>
+            ai.models.generateContent({
+              model: modelId,
+              contents: prompt,
+              config: {
+                responseMimeType: "application/json",
+                temperature: 0.2,
+                maxOutputTokens: getMaxOutputTokens(modelId),
+              },
+            }),
+          ACTIVE_MODEL
+        );
+        usedModel = modelId;
+        const responseText = response.text || "{}";
+        try {
+          parsed = JSON.parse(responseText);
+        } catch {
+          parsed = {
+            summary: responseText,
+            riskLevel: (likelihood * impact) >= 16 ? "CRITICAL" : (likelihood * impact) >= 9 ? "HIGH" : "MEDIUM",
+            suggestedActions: ["Implement automated scanning", "Restrict administrative access", "Enable continuous audit logging"],
+            recommendedControls: [{ code: "ISO 27001 A.5.15", name: "Access Control", description: "Enforce principle of least privilege" }],
+            mitigationPriority: "Short-term (7 days)"
+          };
+        }
+      } catch (fallbackErr: any) {
+        console.warn(`[AI] All models failed for /api/ai/recommend, using rule-based fallback: ${fallbackErr?.message || fallbackErr}`);
         parsed = {
-          summary: responseText,
+          summary: "Unable to reach the AI model; using heuristic severity assessment.",
           riskLevel: (likelihood * impact) >= 16 ? "CRITICAL" : (likelihood * impact) >= 9 ? "HIGH" : "MEDIUM",
           suggestedActions: ["Implement automated scanning", "Restrict administrative access", "Enable continuous audit logging"],
           recommendedControls: [{ code: "ISO 27001 A.5.15", name: "Access Control", description: "Enforce principle of least privilege" }],
@@ -92,7 +126,7 @@ Please analyze and return a strictly formatted JSON object with the following fi
         };
       }
 
-      return res.json({ success: true, recommendation: parsed });
+      return res.json({ success: true, recommendation: parsed, model: usedModel });
     } catch (err: any) {
       console.error("AI Recommendation Error:", err);
       return res.status(500).json({ error: err.message || "Failed to generate AI recommendation" });
@@ -128,17 +162,32 @@ Provide authoritative, concise, actionable advice with bullet points and standar
       const conversationPrompt = messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
       const fullPrompt = `${systemInstruction}\n\n${conversationPrompt}\n\nASSISTANT:`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
-        contents: fullPrompt,
-        config: {
-          temperature: 0.4,
-        },
-      });
+      let reply = "";
+      let usedModel = ACTIVE_MODEL;
+      try {
+        const { result: response, modelId } = await generateWithFallback(
+          (modelId) =>
+            ai.models.generateContent({
+              model: modelId,
+              contents: fullPrompt,
+              config: {
+                temperature: 0.4,
+                maxOutputTokens: getMaxOutputTokens(modelId),
+              },
+            }),
+          ACTIVE_MODEL
+        );
+        usedModel = modelId;
+        reply = response.text || "I am analyzing your query. Please refine or retry.";
+      } catch (fallbackErr: any) {
+        console.warn(`[AI] All models failed for /api/ai/chat: ${fallbackErr?.message || fallbackErr}`);
+        reply = "I am currently unable to reach the AI model. Please check your GEMINI_API_KEY and try again.";
+      }
 
       return res.json({
         success: true,
-        reply: response.text || "I am analyzing your query. Please refine or retry.",
+        reply,
+        model: usedModel,
       });
     } catch (err: any) {
       console.error("AI Chat Error:", err);

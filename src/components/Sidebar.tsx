@@ -15,9 +15,7 @@ import {
   Activity,
   X,
   ChevronLeft,
-  Monitor,
-  Smartphone,
-  Tablet
+  Smartphone
 } from "lucide-react";
 import { ViewTab } from "../types";
 

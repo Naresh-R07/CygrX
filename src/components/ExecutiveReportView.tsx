@@ -4,11 +4,8 @@ import {
   Printer, 
   Download, 
   ShieldCheck, 
-  CheckCircle2, 
-  AlertTriangle, 
   Building2, 
-  Calendar,
-  FileCheck2
+  Calendar
 } from "lucide-react";
 import { Risk, Control, Asset, Incident } from "../types";
 

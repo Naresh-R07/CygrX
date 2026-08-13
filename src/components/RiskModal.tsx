@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, ShieldAlert, Sparkles, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, ShieldAlert } from "lucide-react";
 import { Asset, Risk, RiskLevel, RiskStatus } from "../types";
 import { calculateRiskScore } from "../utils/riskEngine";
 
@@ -18,8 +18,6 @@ export const RiskModal: React.FC<RiskModalProps> = ({
   assets,
   editingRisk,
 }) => {
-  if (!isOpen) return null;
-
   const [title, setTitle] = useState(editingRisk?.title || "");
   const [description, setDescription] = useState(editingRisk?.description || "");
   const [likelihood, setLikelihood] = useState<number>(editingRisk?.likelihood || 3);
@@ -29,6 +27,22 @@ export const RiskModal: React.FC<RiskModalProps> = ({
   const [assignee, setAssignee] = useState(editingRisk?.assignee || "Security Ops Team");
   const [mitigationPlan, setMitigationPlan] = useState(editingRisk?.mitigationPlan || "");
   const [status, setStatus] = useState<RiskStatus>(editingRisk?.status || "OPEN");
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(editingRisk?.title || "");
+      setDescription(editingRisk?.description || "");
+      setLikelihood(editingRisk?.likelihood || 3);
+      setImpact(editingRisk?.impact || 3);
+      setCategory(editingRisk?.category || "Technical");
+      setAssetId(editingRisk?.assetId || "");
+      setAssignee(editingRisk?.assignee || "Security Ops Team");
+      setMitigationPlan(editingRisk?.mitigationPlan || "");
+      setStatus(editingRisk?.status || "OPEN");
+    }
+  }, [isOpen, editingRisk]);
+
+  if (!isOpen) return null;
 
   const scoreMeta = calculateRiskScore(likelihood, impact);
 
@@ -116,7 +130,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({
               <label className="block text-slate-300 font-medium mb-1">Risk Category</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
+                onChange={(e) => setCategory(e.target.value as Risk["category"])}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
               >
                 <option value="Technical">Technical / Cyber</option>
@@ -216,6 +230,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({
                 <option value="UNDER_REVIEW">Under Review</option>
                 <option value="MITIGATED">Mitigated</option>
                 <option value="ACCEPTED">Accepted</option>
+                <option value="TRANSFERRED">Transferred</option>
               </select>
             </div>
           </div>

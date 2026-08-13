@@ -6,12 +6,10 @@ import {
   Link2, 
   Download, 
   Trash2, 
-  PlusCircle, 
   CheckCircle2, 
   Search, 
   X,
-  FileCheck,
-  ExternalLink
+  FileCheck
 } from "lucide-react";
 import { Evidence, Control } from "../types";
 
@@ -32,6 +30,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -223,7 +222,8 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
 
                   <button
                     onClick={() => {
-                      alert(`Downloading presigned file link for ${evidence.fileName}...`);
+                      setDownloadNotice(`Presigned download link generated for "${evidence.fileName}". Check your email/S3 notification.`);
+                      window.setTimeout(() => setDownloadNotice(null), 4000);
                     }}
                     className="px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition-all flex items-center gap-1.5"
                   >
@@ -243,6 +243,13 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
             );
           })}
         </div>
+
+        {downloadNotice && (
+          <div className="mt-4 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            {downloadNotice}
+          </div>
+        )}
 
       </div>
 
@@ -327,7 +334,6 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                     return (
                       <label
                         key={c.id}
-                        onClick={() => handleToggleControl(c.id)}
                         className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs ${
                           isChecked ? "bg-cyan-500/10 text-cyan-300" : "hover:bg-slate-900 text-slate-300"
                         }`}
@@ -335,7 +341,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => {}}
+                          onChange={() => handleToggleControl(c.id)}
                           className="rounded accent-cyan-500"
                         />
                         <span className="font-bold text-cyan-400">{c.controlId}</span>
