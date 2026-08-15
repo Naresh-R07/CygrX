@@ -258,7 +258,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-950/50 transition-all border border-cyan-400/30"
+              className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md transition-all border border-violet-400/30"
             >
               {editingRisk ? "Save Changes" : "Create Risk Entry"}
             </button>

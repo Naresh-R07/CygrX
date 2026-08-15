@@ -96,14 +96,14 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
             <AlertOctagon className="w-5 h-5 text-rose-400" />
             Security Incident Command Center
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-slate-400 mt-1">
             Real-time cybersecurity incident logging, forensic triage, containment workflow, and NIST RS response.
           </p>
         </div>
 
         <button
           onClick={() => setIsNewIncidentModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/50 border border-rose-400/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-violet-400/30 transition-all"
         >
           <PlusCircle className="w-4 h-4" />
           Log Security Incident
@@ -121,8 +121,8 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative min-w-[200px]">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
                 type="text"
@@ -165,7 +165,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-semibold text-slate-400">Status:</span>
+                    <span className="text-sm font-semibold text-slate-400">Status:</span>
                     <select
                       value={incident.status}
                       onChange={(e) => onUpdateIncidentStatus(incident.id, e.target.value as IncidentStatus)}
@@ -184,10 +184,10 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed">{incident.description}</p>
+                <p className="text-sm text-slate-300 leading-relaxed">{incident.description}</p>
 
                 {incident.rootCause && (
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-300">
                     <strong className="text-rose-400">Root Cause Triage:</strong> {incident.rootCause}
                   </div>
                 )}
@@ -195,7 +195,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                 {/* Action items */}
                 {incident.actionItems && incident.actionItems.length > 0 && (
                   <div className="space-y-1 text-xs">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase">Containment Playbook Actions:</span>
+                    <span className="text-sm font-bold text-slate-400 uppercase">Containment Playbook Actions:</span>
                     <ul className="list-disc list-inside space-y-0.5 text-slate-300">
                       {incident.actionItems.map((item, idx) => (
                         <li key={idx}>{item}</li>
@@ -251,7 +251,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-300 font-medium mb-1">Severity</label>
                   <select
@@ -315,7 +315,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/50 border border-rose-400/30"
+                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-violet-400/30"
                 >
                   Log Incident
                 </button>

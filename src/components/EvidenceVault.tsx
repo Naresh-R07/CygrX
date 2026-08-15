@@ -130,14 +130,14 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
             <FolderLock className="w-5 h-5 text-cyan-400" />
             Central Audit Evidence Vault
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-slate-400 mt-1">
             Secure, immutable audit artifact repository backed by MinIO S3 object storage for ISO 27001 & NIST CSF proof.
           </p>
         </div>
 
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-950/50 border border-cyan-400/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-cyan-400/30 transition-all"
         >
           <UploadCloud className="w-4 h-4" />
           Upload Evidence Artifact
@@ -155,14 +155,14 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
             </span>
           </div>
 
-          <div className="relative min-w-[240px]">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
               placeholder="Filter artifact title, file name, uploader..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
             />
           </div>
         </div>
@@ -184,38 +184,38 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-200 text-xs">{evidence.title}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-cyan-400 border border-slate-700">
+                      <span className="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-cyan-400 border border-slate-700">
                         {evidence.fileSize}
                       </span>
                     </div>
 
-                    <p className="text-xs font-mono text-slate-400">{evidence.fileName}</p>
+                    <p className="text-sm font-mono text-slate-400">{evidence.fileName}</p>
 
                     {evidence.notes && (
-                      <p className="text-[11px] text-slate-400 italic">{evidence.notes}</p>
+                      <p className="text-sm text-slate-400 italic">{evidence.notes}</p>
                     )}
 
                     {/* Linked Controls Pills */}
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <span className="text-[10px] text-slate-500 font-semibold">Linked Controls:</span>
+                      <span className="text-xs text-slate-500 font-semibold">Linked Controls:</span>
                       {linkedControls.length > 0 ? (
                         linkedControls.map((c) => (
                           <span
                             key={c.id}
-                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                            className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
                           >
                             {c.controlId} ({c.title})
                           </span>
                         ))
                       ) : (
-                        <span className="text-[10px] text-slate-500 italic">Unassigned</span>
+                        <span className="text-xs text-slate-500 italic">Unassigned</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0 self-end md:self-auto text-xs">
-                  <div className="text-right text-[11px] text-slate-400 hidden sm:block">
+                  <div className="text-right text-sm text-slate-400 hidden sm:block">
                     <div>Uploaded by {evidence.uploadedBy}</div>
                     <div className="text-slate-500">{evidence.uploadedAt}</div>
                   </div>
@@ -271,7 +271,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleUploadSubmit} className="p-6 space-y-4 text-xs">
+            <form onSubmit={handleUploadSubmit} className="p-6 space-y-4 text-sm">
               
               {/* Drag and Drop Zone */}
               <div
@@ -289,7 +289,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                 <p className="text-sm font-bold text-slate-200 mb-1">
                   Drag and drop proof files here, or click to browse
                 </p>
-                <p className="text-xs text-slate-400 mb-3">Supports PDF, CSV, PNG, JPG, JSON (Max 50MB)</p>
+                <p className="text-sm text-slate-400 mb-3">Supports PDF, CSV, PNG, JPG, JSON (Max 50MB)</p>
 
                 <input
                   type="file"
@@ -299,7 +299,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                 />
                 <label
                   htmlFor="file-upload-input"
-                  className="px-4 py-2 rounded-xl font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 cursor-pointer inline-block"
+                  className="px-4 py-2 rounded-xl font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 cursor-pointer inline-block text-sm"
                 >
                   Select Local File
                 </label>
@@ -373,7 +373,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg border border-cyan-400/30"
+                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-cyan-400/30"
                 >
                   Save Artifact
                 </button>

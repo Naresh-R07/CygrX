@@ -9,8 +9,6 @@ import { AssetInventory } from "./components/AssetInventory";
 import { EvidenceVault } from "./components/EvidenceVault";
 import { IncidentTracker } from "./components/IncidentTracker";
 import { AiSecurityAdvisor } from "./components/AiSecurityAdvisor";
-import { ExecutiveReportView } from "./components/ExecutiveReportView";
-import { OpenSourceIntegrations } from "./components/OpenSourceIntegrations";
 
 import { 
   initialAssets, 
@@ -43,27 +41,14 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   }
 }
 
-// Helper for Realtime Viewport & Tab Aspect Ratio Detection
 function getViewportDetails() {
   const width = typeof window !== "undefined" ? window.innerWidth : 1280;
-  const height = typeof window !== "undefined" ? window.innerHeight : 800;
-  
   const isMobile = width < 1024;
   let deviceType = "PC";
   if (width < 640) deviceType = "Mobile";
   else if (width < 1024) deviceType = "Tablet";
   else if (width >= 1920) deviceType = "UltraWide";
-
-  // Calculate mathematical aspect ratio
-  const ratio = width / height;
-  let aspectRatio = "16:9";
-  if (ratio < 0.7) aspectRatio = "9:16 (Tall)";
-  else if (ratio < 1.1) aspectRatio = "4:3 (Square)";
-  else if (ratio < 1.5) aspectRatio = "16:10";
-  else if (ratio < 2.0) aspectRatio = "16:9";
-  else aspectRatio = "21:9 (UltraWide)";
-
-  return { width, height, isMobile, deviceType, aspectRatio };
+  return { width, isMobile, deviceType };
 }
 
 export default function App() {
@@ -267,8 +252,6 @@ export default function App() {
         criticalRisksCount={criticalRisksCount}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-        deviceType={viewport.deviceType}
-        aspectRatio={viewport.aspectRatio}
         isMobile={viewport.isMobile}
       />
 
@@ -284,8 +267,6 @@ export default function App() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           isMobile={viewport.isMobile}
-          deviceType={viewport.deviceType}
-          aspectRatio={viewport.aspectRatio}
         />
 
         {/* Content View Area */}
@@ -376,10 +357,6 @@ export default function App() {
             />
           )}
 
-          {currentTab === "integrations" && (
-            <OpenSourceIntegrations />
-          )}
-
           {currentTab === "ai-advisor" && (
             <AiSecurityAdvisor
               risks={risks}
@@ -392,15 +369,6 @@ export default function App() {
             />
           )}
 
-          {currentTab === "executive-report" && (
-            <ExecutiveReportView
-              risks={risks}
-              assets={assets}
-              isoControls={isoControls}
-              nistControls={nistControls}
-              incidents={incidents}
-            />
-          )}
         </main>
 
       </div>

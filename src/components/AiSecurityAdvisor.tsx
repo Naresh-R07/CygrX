@@ -221,18 +221,18 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cyber-card p-6 rounded-3xl">
         <div className="flex items-center gap-3">
-          <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.35)] border border-violet-400/40">
-            <Sparkles className="w-6 h-6 animate-spin" style={{ animationDuration: '6s' }} />
+          <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white border border-violet-400/40">
+            <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-white tracking-tight font-mono text-gradient-violet">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-black text-white tracking-tight font-mono text-gradient-violet">
                 AI Cyber Security Lead Auditor & SOC Advisor
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 font-mono">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 font-mono">
                 Gemini AI Engine
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono">
                 {activeModel} • 1M ctx
               </span>
             </div>
@@ -270,7 +270,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
       </div>
 
       {/* Main Chat Box */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[520px] overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[60vh] sm:h-[520px] overflow-hidden shadow-2xl">
         
         {/* Messages Stream */}
         <div className="flex-1 p-6 overflow-y-auto space-y-4">
@@ -292,13 +292,13 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
                 </div>
 
                 <div
-                  className={`max-w-[82%] rounded-2xl p-4 text-xs leading-relaxed ${
+                  className={`max-w-[82%] rounded-2xl p-4 text-sm leading-relaxed ${
                     isBot
                       ? "bg-slate-950/80 border border-slate-800 text-slate-200 shadow-sm"
                       : "bg-cyan-600 text-white shadow-md"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-4 mb-1 text-[10px] opacity-70">
+                  <div className="flex items-center justify-between gap-4 mb-1 text-xs opacity-70">
                     <span className="font-bold">{isBot ? "Aegis AI Auditor" : "You (Security Specialist)"}</span>
                     <span>{msg.timestamp}</span>
                   </div>
@@ -339,7 +339,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
           <button
             type="submit"
             disabled={isLoading || !inputPrompt.trim()}
-            className="px-5 py-3 rounded-xl font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/50 disabled:opacity-50 transition-all flex items-center gap-2 text-xs"
+            className="px-5 py-3 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md disabled:opacity-50 transition-all flex items-center gap-2 text-xs"
           >
             <span>Consult</span>
             <Send className="w-3.5 h-3.5" />

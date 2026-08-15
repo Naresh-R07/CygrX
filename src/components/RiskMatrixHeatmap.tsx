@@ -82,15 +82,15 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
       {/* Title & Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cyber-card p-6 rounded-3xl relative overflow-hidden">
         <div>
-          <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping" />
+          <span className="text-xs font-bold text-violet-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
             CYGRX THREAT HEATMAP ENGINE
           </span>
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 font-mono mt-0.5 text-gradient-violet">
-            <Grid3X3 className="w-5 h-5 text-violet-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+            <Grid3X3 className="w-5 h-5 text-violet-400" />
             5x5 Risk Matrix & Threat Heatmap
           </h1>
-          <p className="text-xs text-slate-300 mt-1 font-mono">
+          <p className="text-sm text-slate-300 mt-1 font-mono">
             Enterprise threat severity matrix (Risk Score = Likelihood × Impact). Click matrix cells to filter active risk vectors.
           </p>
         </div>
@@ -106,7 +106,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
           )}
           <button
             onClick={onOpenNewRiskModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.35)] border border-violet-400/40 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border border-violet-400/40 transition-all cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             Add Threat Risk
@@ -122,7 +122,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
             <span className="text-xs text-slate-400 font-mono">(Y-Axis: Likelihood | X-Axis: Impact)</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-cyan-500/30 border border-cyan-400" />
               <span className="text-slate-300">Low (1-4)</span>
@@ -144,13 +144,13 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
 
         {/* Matrix Layout */}
         <div className="overflow-x-auto pt-2 pb-2">
-          <div className="min-w-[640px]">
+          <div className="w-full">
             
             {/* Rows for Likelihood (5 down to 1) */}
             {likelihoods.map((l) => (
               <div key={`lh-${l}`} className="flex items-center gap-2 mb-2">
                 {/* Y-Axis Label */}
-                <div className="w-40 shrink-0 text-right pr-3 text-xs font-semibold text-slate-400">
+                <div className="w-16 sm:w-28 lg:w-40 shrink-0 text-right pr-3 text-xs font-semibold text-slate-400">
                   {likelihoodLabels[l]}
                 </div>
 
@@ -169,11 +169,11 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                           if (isSelected) setSelectedCell(null);
                           else setSelectedCell({ likelihood: l, impact: imp });
                         }}
-                        className={`h-16 rounded-xl border p-2 flex flex-col justify-between transition-all relative ${cellColorClass} ${
+                        className={`h-10 sm:h-14 lg:h-16 rounded-xl border p-2 flex flex-col justify-between transition-all relative ${cellColorClass} ${
                           isSelected ? "ring-2 ring-cyan-400 border-cyan-400 scale-[1.02] z-10" : ""
                         }`}
                       >
-                        <div className="flex items-center justify-between w-full text-[10px] font-bold opacity-80">
+                        <div className="flex items-center justify-between w-full text-xs font-bold opacity-80">
                           <span>Score {score}</span>
                           {cellRisks.length > 0 && (
                             <span className="px-1.5 py-0.5 rounded-full bg-slate-950/80 text-white font-extrabold border border-white/20">
@@ -193,7 +193,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
 
             {/* X-Axis Footer Label */}
             <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-800">
-              <div className="w-40 shrink-0 text-right pr-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <div className="w-16 sm:w-28 lg:w-40 shrink-0 text-right pr-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Impact →
               </div>
               <div className="grid grid-cols-5 gap-2 flex-1 text-center text-xs font-semibold text-slate-400">
@@ -226,7 +226,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
 
           <div className="flex flex-wrap items-center gap-3">
             {/* Search Input */}
-            <div className="relative min-w-[200px]">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
                 type="text"
@@ -272,12 +272,12 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
             <thead>
               <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
                 <th className="py-3 px-4">Risk Title & Details</th>
-                <th className="py-3 px-4">Affected Asset</th>
-                <th className="py-3 px-4 text-center">Likelihood</th>
-                <th className="py-3 px-4 text-center">Impact</th>
+                <th className="py-3 px-4 hidden lg:table-cell">Affected Asset</th>
+                <th className="py-3 px-4 text-center hidden lg:table-cell">Likelihood</th>
+                <th className="py-3 px-4 text-center hidden lg:table-cell">Impact</th>
                 <th className="py-3 px-4 text-center">Score</th>
                 <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Assignee</th>
+                <th className="py-3 px-4 hidden lg:table-cell">Assignee</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -305,15 +305,15 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                         </p>
                       </td>
 
-                      <td className="py-3.5 px-4 font-medium text-slate-300">
+                      <td className="py-3.5 px-4 font-medium text-slate-300 hidden lg:table-cell">
                         {risk.assetName || "Organization-wide"}
                       </td>
 
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-300">
+                      <td className="py-3.5 px-4 text-center font-bold text-slate-300 hidden lg:table-cell">
                         {risk.likelihood}
                       </td>
 
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-300">
+                      <td className="py-3.5 px-4 text-center font-bold text-slate-300 hidden lg:table-cell">
                         {risk.impact}
                       </td>
 
@@ -337,7 +337,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                         </select>
                       </td>
 
-                      <td className="py-3.5 px-4 text-slate-400">
+                      <td className="py-3.5 px-4 text-slate-400 hidden lg:table-cell">
                         {risk.assignee}
                       </td>
 
