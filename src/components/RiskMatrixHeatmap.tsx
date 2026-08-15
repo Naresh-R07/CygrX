@@ -106,7 +106,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
           )}
           <button
             onClick={onOpenNewRiskModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border border-violet-400/40 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/40 transition-all cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             Add Threat Risk
@@ -181,7 +181,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                             </span>
                           )}
                         </div>
-                        <div className="text-right text-[11px] font-extrabold tracking-tight">
+                        <div className="text-right text-xs font-extrabold tracking-tight">
                           {cellRisks.length > 0 ? `${cellRisks.length} Risk${cellRisks.length > 1 ? "s" : ""}` : "—"}
                         </div>
                       </button>
@@ -214,7 +214,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-bold text-white">Risk Register Inventory</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-cyan-400 border border-slate-700">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-violet-400 border border-slate-700">
               {filteredRisks.length} Items
             </span>
             {selectedCell && (
@@ -270,7 +270,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
         <div className="overflow-x-auto border border-slate-800 rounded-xl">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+              <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-xs">
                 <th className="py-3 px-4">Risk Title & Details</th>
                 <th className="py-3 px-4 hidden lg:table-cell">Affected Asset</th>
                 <th className="py-3 px-4 text-center hidden lg:table-cell">Likelihood</th>
@@ -297,10 +297,10 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                       className="hover:bg-slate-800/40 transition-colors group"
                     >
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors">
+                        <div className="font-semibold text-slate-200 group-hover:text-violet-400 transition-colors">
                           {risk.title}
                         </div>
-                        <p className="text-slate-400 text-[11px] line-clamp-1 max-w-md mt-0.5">
+                        <p className="text-slate-400 text-xs line-clamp-1 max-w-md mt-0.5">
                           {risk.description}
                         </p>
                       </td>
@@ -327,7 +327,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                         <select
                           value={risk.status}
                           onChange={(e) => onUpdateRiskStatus(risk.id, e.target.value as RiskStatus)}
-                          className="bg-slate-950 border border-slate-700/80 rounded-md px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-cyan-500"
+                          className="bg-slate-950 border border-slate-700/80 rounded-md px-2 py-1 text-xs font-semibold text-slate-200 focus:outline-none focus:border-cyan-500"
                         >
                           <option value="OPEN">Open</option>
                           <option value="UNDER_REVIEW">Under Review</option>
@@ -344,7 +344,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                       <td className="py-3.5 px-4 text-right space-x-2">
                         <button
                           onClick={() => onRequestAiAdvice(risk)}
-                          className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all inline-flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all inline-flex items-center gap-1"
                           title="Get AI ISO/NIST Controls Recommendation"
                         >
                           <Sparkles className="w-3 h-3 text-purple-300" />
@@ -353,7 +353,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
 
                         <button
                           onClick={() => onSelectRisk(risk)}
-                          className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+                          className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
                         >
                           View
                         </button>

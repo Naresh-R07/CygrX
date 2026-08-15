@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Bell className="w-4 h-4 text-slate-300 group-hover:text-violet-300 transition-colors" />
               {openIncidentsCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white font-mono animate-pulse">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white font-mono animate-pulse">
                   {openIncidentsCount}
                 </span>
               )}
@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => onSelectTab("ai-advisor")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold font-mono tracking-tight transition-all border cursor-pointer shrink-0 ${
                 currentTab === "ai-advisor"
-                  ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-violet-400 shadow-md"
+                  ? "bg-violet-600 text-white border-violet-400"
                   : "bg-slate-900/80 hover:bg-slate-800 text-violet-300 border-violet-500/30 hover:border-violet-500/60"
               }`}
             >
@@ -100,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenNewRiskModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white shadow-md border border-violet-400/40 transition-all font-mono cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-violet-600 hover:bg-violet-500 text-white transition-all font-mono cursor-pointer shrink-0"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span className="hidden md:inline">LOG THREAT</span>

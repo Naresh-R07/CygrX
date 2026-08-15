@@ -19,6 +19,84 @@ interface AiSecurityAdvisorProps {
   onClearTargetRisk?: () => void;
 }
 
+function generateLocalRecommendation(risk: Risk, isoControls: Control[], nistControls: Control[]): string {
+  const score = risk.riskScore;
+  const level = score >= 16 ? "CRITICAL" : score >= 10 ? "HIGH" : score >= 5 ? "MEDIUM" : "LOW";
+  const priority = score >= 16 ? "Immediate (24 hours)" : score >= 10 ? "Short-term (7 days)" : "Medium-term (30 days)";
+
+  const matchingIso = isoControls.filter(c =>
+    risk.targetFrameworkControls?.some(tf => tf.includes(c.controlId))
+  );
+  const matchingNist = nistControls.filter(c =>
+    risk.targetFrameworkControls?.some(tf => tf.includes(c.controlId))
+  );
+
+  const actions = [
+    "Conduct detailed technical assessment of the affected asset and scope of exposure",
+    "Implement compensating controls to reduce immediate attack surface",
+    "Schedule remediation review within the defined priority window",
+    "Document findings and update risk register with current status",
+  ];
+
+  let rec = `### AI Security Recommendation for "${risk.title}"\n\n`;
+  rec += `**Executive Threat Summary:**\n`;
+  rec += `${risk.description}\n\n`;
+  rec += `**Priority:** ${priority} | **Risk Rating:** ${level} (${score}/25)\n\n`;
+  rec += `**Recommended Action Steps:**\n`;
+  rec += actions.map(a => `- ${a}`).join("\n") + "\n\n";
+
+  if (matchingIso.length > 0 || matchingNist.length > 0) {
+    rec += `**Target Framework Standard Controls:**\n`;
+    matchingIso.forEach(c => {
+      rec += `- **ISO 27001 ${c.controlId} (${c.title})**: ${c.description}\n`;
+    });
+    matchingNist.forEach(c => {
+      rec += `- **NIST CSF ${c.controlId} (${c.title})**: ${c.description}\n`;
+    });
+  } else {
+    rec += `**Suggested Controls:**\n`;
+    rec += `- ISO 27001 A.8.8 Management of technical vulnerabilities\n`;
+    rec += `- NIST PR.IP-1 Protection of Info Assets\n`;
+  }
+
+  return rec;
+}
+
+function generateLocalChatReply(
+  prompt: string,
+  risks: Risk[],
+  isoControls: Control[],
+  nistControls: Control[],
+  assets: Asset[],
+  incidents: Incident[]
+): string {
+  const openCount = risks.filter(r => r.status === "OPEN").length;
+  const critCount = risks.filter(r => r.riskScore >= 16).length;
+  const isoScore = Math.round((isoControls.filter(c => c.status === "FULLY_IMPLEMENTED").length / isoControls.length) * 100);
+  const nistScore = Math.round((nistControls.filter(c => c.status === "FULLY_IMPLEMENTED").length / nistControls.length) * 100);
+  const openIncidents = incidents.filter(i => i.status !== "CLOSED").length;
+
+  const lower = prompt.toLowerCase();
+
+  if (lower.includes("iso") || lower.includes("27001") || lower.includes("compliance") || lower.includes("gap")) {
+    return `Based on your current posture:\n- ISO 27001 Readiness: ${isoScore}%\n- ${isoControls.filter(c => c.status !== "FULLY_IMPLEMENTED").length} controls need attention\n\n**Recommended Steps:**\n1. Prioritize PARTIALLY_IMPLEMENTED controls first (quick wins)\n2. Address NOT_IMPLEMENTED controls with formal remediation plans\n3. Schedule internal audit for FULLY_IMPLEMENTED controls\n4. Update Statement of Applicability with current findings\n\nFocus on access control (A.5.15), vulnerability management (A.8.8), and supplier relationships (A.5.19) which show gaps.`;
+  }
+
+  if (lower.includes("nist") || lower.includes("csf") || lower.includes("framework")) {
+    return `NIST CSF 2.0 Assessment:\n- Maturity Score: ${nistScore}%\n- ${nistControls.filter(c => c.status !== "FULLY_IMPLEMENTED").length} functions need improvement\n\n**Priority Areas:**\n1. Strengthen IDENTIFY function (asset inventory completeness)\n2. Enhance PROTECT function (access control, data security)\n3. Improve DETECT function (continuous monitoring)\n4. Validate RESPOND function (incident response plans)\n5. Test RECOVER function (disaster recovery drills)`;
+  }
+
+  if (lower.includes("incident") || lower.includes("breach") || lower.includes("response")) {
+    return `Incident Response Guidance:\n- Active incidents: ${openIncidents}\n- Follow NIST SP 800-61r2 incident handling lifecycle\n\n**Immediate Steps:**\n1. CONTAIN: Isolate affected systems, preserve evidence\n2. ERADICATE: Remove root cause, patch vulnerabilities\n3. RECOVER: Restore systems from clean backups\n4. LESSONS LEARNED: Conduct post-incident review within 48 hours\n\nEnsure all actions are documented in the incident tracker.`;
+  }
+
+  if (lower.includes("risk") || lower.includes("threat") || lower.includes("scoring")) {
+    return `Current Risk Landscape:\n- Total Risks: ${risks.length}\n- Open: ${openCount} | Critical: ${critCount}\n\n**Risk Management Recommendations:**\n1. Address critical risks (score >= 16) immediately\n2. Review under_risk risks for status updates\n3. Validate mitigated risks have effective controls\n4. Consider risk transfer for third-party exposures\n5. Update risk register monthly with latest assessments`;
+  }
+
+  return `I'm your AI GRC assistant. Here's your current security snapshot:\n- Open Risks: ${openCount} (${critCount} Critical)\n- ISO 27001: ${isoScore}% | NIST CSF 2.0: ${nistScore}%\n- Assets: ${assets.length} | Active Incidents: ${openIncidents}\n\nAsk me about:\n- ISO 27001 gap analysis or compliance gaps\n- NIST CSF 2.0 framework maturity\n- Incident response procedures\n- Risk scoring and threat assessment\n- Control recommendations`;
+}
+
 export const AiSecurityAdvisor: React.FC<AiSecurityAdvisorProps> = ({
   risks,
   isoControls,
@@ -32,7 +110,7 @@ export const AiSecurityAdvisor: React.FC<AiSecurityAdvisorProps> = ({
     {
       id: "msg-1",
       role: "assistant",
-      content: `Greetings! I am Aegis AI, your virtual Senior Cybersecurity Lead Auditor certified in ISO 27001:2022 and NIST CSF 2.0.
+      content: `Greetings! I am your virtual Senior Cybersecurity Lead Auditor certified in ISO 27001:2022 and NIST CSF 2.0.
 
 I have analyzed your real-time security posture:
 - Open Risk Exposure: ${risks.filter(r => r.status === 'OPEN').length} active threats (${risks.filter(r => r.riskScore >= 16).length} Critical)
@@ -46,7 +124,6 @@ How can I assist your security and governance team today?`,
 
   const [inputPrompt, setInputPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeModel, setActiveModel] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<ChatMessage[]>(messages);
 
@@ -73,46 +150,9 @@ How can I assist your security and governance team today?`,
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/ai/recommend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: targetRisk.title,
-          description: targetRisk.description,
-          likelihood: targetRisk.likelihood,
-          impact: targetRisk.impact,
-          assetName: targetRisk.assetName,
-          category: targetRisk.category,
-        }),
-      });
-
-      const data = await res.json();
-      let botContent = "";
-
-      if (data.success && data.recommendation) {
-        if (data.model) setActiveModel(data.model);
-        const rec = data.recommendation;
-        botContent = `### AI Security Recommendation for "${targetRisk.title}"
-
-**Executive Threat Summary:**
-${rec.summary}
-
-**Priority:** ${rec.mitigationPriority} | **Risk Rating:** ${rec.riskLevel}
-
-**Recommended Technical & Administrative Action Steps:**
-${rec.suggestedActions?.map((act: string) => `- ${act}`).join("\n")}
-
-**Target Framework Standard Controls:**
-${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.description}`).join("\n")}`;
-      } else {
-        botContent = `Target Risk Analysis for "${targetRisk.title}":
-- **Priority:** High
-- **ISO 27001 Mapping:** A.8.8 Management of technical vulnerabilities
-- **NIST CSF Mapping:** PR.IP-1 Protection of Info Assets
-- **Suggested Step:** Apply vendor security patch within 48 hours and restrict ingress access via WAF rules.`;
-      }
-
+    // Generate locally
+    setTimeout(() => {
+      const botContent = generateLocalRecommendation(targetRisk, isoControls, nistControls);
       setMessages((prev) => [
         ...prev,
         {
@@ -122,24 +162,11 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
-    } catch (err) {
-      console.error("AI Recommendation Error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `bot-err-${Date.now()}`,
-          role: "assistant",
-          content: "Encountered an issue contacting the Gemini recommendation engine. Please check your GEMINI_API_KEY configuration and try again.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    } finally {
       setIsLoading(false);
       if (onClearTargetRisk) onClearTargetRisk();
-    }
-  }, [onClearTargetRisk]);
+    }, 600);
+  }, [isoControls, nistControls, onClearTargetRisk]);
 
-  // Handle active targeted risk consultation
   useEffect(() => {
     if (activeTargetRisk) {
       handleRequestRiskRecommendation(activeTargetRisk);
@@ -163,49 +190,20 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
     setMessages((prev) => [...prev, newMsg]);
     setIsLoading(true);
 
-    const historySnapshot = messagesRef.current;
-
-    try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...historySnapshot, newMsg].map((m) => ({ role: m.role, content: m.content })),
-          contextData: {
-            riskCount: risks.length,
-            isoScore: Math.round((isoControls.filter(c => c.status === 'FULLY_IMPLEMENTED').length / isoControls.length) * 100),
-            nistScore: Math.round((nistControls.filter(c => c.status === 'FULLY_IMPLEMENTED').length / nistControls.length) * 100),
-            assetCount: assets.length,
-            incidentCount: incidents.filter(i => i.status !== 'CLOSED').length,
-          },
-        }),
-      });
-
-      const data = await res.json();
-      if (data.model) setActiveModel(data.model);
+    // Generate locally
+    setTimeout(() => {
+      const reply = generateLocalChatReply(userMsgText, risks, isoControls, nistControls, assets, incidents);
       setMessages((prev) => [
         ...prev,
         {
           id: `bot-${Date.now()}`,
           role: "assistant",
-          content: data.reply || "I have analyzed your query. Here are the recommended control steps.",
+          content: reply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `bot-err-${Date.now()}`,
-          role: "assistant",
-          content: "Encountered issue communicating with Gemini server. Please check your GEMINI_API_KEY in Secrets.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    } finally {
       setIsLoading(false);
-    }
+    }, 400);
   };
 
   const presetPrompts = [
@@ -221,7 +219,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cyber-card p-6 rounded-3xl">
         <div className="flex items-center gap-3">
-          <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white border border-violet-400/40">
+          <div className="p-3.5 rounded-2xl bg-violet-600 text-white border border-violet-400/40">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
@@ -230,10 +228,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
                 AI Cyber Security Lead Auditor & SOC Advisor
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 font-mono">
-                Gemini AI Engine
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono">
-                {activeModel} • 1M ctx
+                AI Engine
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-1 font-mono">
@@ -299,7 +294,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
                   }`}
                 >
                   <div className="flex items-center justify-between gap-4 mb-1 text-xs opacity-70">
-                    <span className="font-bold">{isBot ? "Aegis AI Auditor" : "You (Security Specialist)"}</span>
+                    <span className="font-bold">{isBot ? "AI Auditor" : "You (Security Specialist)"}</span>
                     <span>{msg.timestamp}</span>
                   </div>
 
@@ -317,8 +312,8 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
                 <Sparkles className="w-4 h-4 animate-spin" />
               </div>
               <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs text-purple-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
-                Gemini is analyzing threat posture and standard controls...
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                AI is analyzing threat posture and standard controls...
               </div>
             </div>
           )}
@@ -339,7 +334,7 @@ ${rec.recommendedControls?.map((c: any) => `- **${c.code} (${c.name})**: ${c.des
           <button
             type="submit"
             disabled={isLoading || !inputPrompt.trim()}
-            className="px-5 py-3 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md disabled:opacity-50 transition-all flex items-center gap-2 text-xs"
+            className="px-5 py-3 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-50 transition-all flex items-center gap-2 text-xs"
           >
             <span>Consult</span>
             <Send className="w-3.5 h-3.5" />

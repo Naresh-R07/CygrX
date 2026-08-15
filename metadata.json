@@ -2,6 +2,5 @@
   "name": "CygrX Cyber GRC Platform",
   "description": "Enterprise Cybersecurity Governance, Risk & Compliance Platform featuring 5x5 Risk Heatmaps, ISO 27001 & NIST CSF 2.0 trackers, Asset Vault, Evidence Management, Incident Response, and AI Risk Advisor.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"],
-  "aiModel": "gemini-3.6-flash"
+  "majorCapabilities": []
 }

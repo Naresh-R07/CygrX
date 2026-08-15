@@ -109,7 +109,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
                 className="transition-all duration-1000 ease-out"
               />
             </svg>
-            <span className="absolute text-[11px] font-bold text-slate-200 font-mono">{implemented}/{total}</span>
+            <span className="absolute text-xs font-bold text-slate-200 font-mono">{implemented}/{total}</span>
           </div>
         </div>
       </div>
@@ -118,7 +118,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase">Fully Implemented</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase">Fully Implemented</span>
             <span className="text-2xl font-extrabold text-emerald-400 block mt-1">{implemented}</span>
           </div>
           <CheckCircle2 className="w-6 h-6 text-emerald-500/40" />
@@ -126,7 +126,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
 
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase">In Progress / Partial</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase">In Progress / Partial</span>
             <span className="text-2xl font-extrabold text-amber-400 block mt-1">{partial}</span>
           </div>
           <Clock className="w-6 h-6 text-amber-500/40" />
@@ -134,7 +134,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
 
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase">Not Implemented</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase">Not Implemented</span>
             <span className="text-2xl font-extrabold text-rose-400 block mt-1">{notImplemented}</span>
           </div>
           <AlertCircle className="w-6 h-6 text-rose-500/40" />
@@ -142,7 +142,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
 
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase">Audit Evidence Attached</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase">Audit Evidence Attached</span>
             <span className="text-2xl font-extrabold text-cyan-400 block mt-1">
               {linkedEvidenceCount} Files
             </span>
@@ -208,7 +208,7 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
                     </span>
                     <div>
                       <h3 className="text-sm font-bold text-white">{control.title}</h3>
-                      <span className="text-[11px] font-medium text-slate-400">{control.category}</span>
+                      <span className="text-xs font-medium text-slate-400">{control.category}</span>
                     </div>
                   </div>
 
@@ -263,14 +263,14 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
                       linkedEvidences.map((ev) => (
                         <span
                           key={ev.id}
-                          className="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 text-[11px] font-medium flex items-center gap-1"
+                          className="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 text-xs font-medium flex items-center gap-1"
                         >
                           <Link2 className="w-3 h-3 text-cyan-400" />
                           {ev.fileName}
                         </span>
                       ))
                     ) : (
-                      <span className="text-slate-500 italic text-[11px]">No evidence file uploaded</span>
+                      <span className="text-slate-500 italic text-xs">No evidence file uploaded</span>
                     )}
                   </div>
                 </div>

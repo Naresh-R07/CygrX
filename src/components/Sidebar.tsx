@@ -10,10 +10,8 @@ import {
   Sparkles, 
   ChevronRight,
   Shield,
-  Activity,
   X,
-  ChevronLeft,
-  Smartphone
+  ChevronLeft
 } from "lucide-react";
 import { ViewTab } from "../types";
 
@@ -115,22 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
-          <div className="p-3 bg-slate-950/80 border-b border-slate-800/80 text-xs font-mono flex items-center justify-between text-slate-300">
-            <span className="flex items-center gap-1">
-              <Smartphone className="w-3 h-3 text-rose-400" /> Mobile
-            </span>
-            <span className="px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-500/30 font-bold">
-              TOUCH DECK
-            </span>
-          </div>
-
           <div className="p-4 flex-1 overflow-y-auto space-y-1.5 custom-scrollbar">
-            <div className="flex items-center justify-between px-2 mb-2">
-              <p className="text-xs font-bold text-violet-400 uppercase tracking-widest font-mono">
-                NAVIGATION MODULES
-              </p>
-            </div>
-
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -158,9 +141,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             })}
           </div>
 
-          <div className="p-4 border-t border-violet-900/30 text-xs font-mono text-slate-500 flex items-center justify-between bg-slate-950/90">
-            <span>MOBILE TELEMETRY</span>
-            <span className="text-emerald-400 font-bold flex items-center gap-1">
+          <div className="p-4 border-t border-violet-900/30 text-xs font-mono text-slate-500 flex items-center justify-center bg-slate-950/90">
+            <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               ONLINE
             </span>
@@ -245,35 +227,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           })}
         </nav>
-
-        {/* Telemetry Health Module - shown when sidebar expanded */}
-        {isOpen && (
-          <div className="mt-6 p-3.5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-violet-500/20 text-xs relative overflow-hidden">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-1">
-                <Activity className="w-3 h-3 text-cyan-400" /> THREAT DEFENSE
-              </span>
-              <span className="text-violet-400 font-bold font-mono text-sm">99.8%</span>
-            </div>
-            <div className="w-full bg-slate-950 rounded-full h-1.5 p-0.5 border border-violet-900/40 overflow-hidden">
-              <div className="bg-gradient-to-r from-violet-500 via-cyan-400 to-emerald-400 h-1 rounded-full transition-all duration-1000" style={{ width: "99.8%" }} />
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer Node Identifier */}
       <div className={`p-3 border-t border-violet-900/30 text-xs font-mono text-slate-500 flex items-center bg-slate-950/80 ${isOpen ? "justify-between" : "justify-center"}`}>
         {isOpen ? (
           <>
-            <span className="text-slate-400 truncate">NODE: <span className="text-violet-400 font-bold">CYBER-SOC-01</span></span>
-            <span className="flex items-center gap-1.5 text-violet-400 font-bold shrink-0">
-              <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-              ENCRYPTED
+            <span className="text-slate-400 truncate">SOC Node Active</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 font-bold shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              ONLINE
             </span>
           </>
         ) : (
-          <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" title="NODE CYBER-SOC-01 ENCRYPTED" />
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="SOC Node Online" />
         )}
       </div>
     </aside>

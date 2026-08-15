@@ -1,0 +1,17 @@
+services:
+  cygrx:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - grc-data:/app/data
+      - grc-uploads:/app/server/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-cygrx-production-secret-change-me}
+    restart: unless-stopped
+
+volumes:
+  grc-data:
+  grc-uploads:

@@ -50,10 +50,10 @@ export function getHeatmapCellColor(likelihood: number, impact: number, count: n
     return "bg-emerald-950/20 border-emerald-900/40 text-slate-500 hover:bg-emerald-900/30";
   }
 
-  if (score >= 16) return "bg-rose-600/25 border-rose-500 text-rose-300 shadow-lg shadow-rose-950/40 hover:bg-rose-600/40";
-  if (score >= 10) return "bg-orange-600/25 border-orange-500 text-orange-300 shadow-lg shadow-orange-950/40 hover:bg-orange-600/40";
-  if (score >= 5) return "bg-amber-600/25 border-amber-500 text-amber-300 shadow-lg shadow-amber-950/40 hover:bg-amber-600/40";
-  return "bg-emerald-600/25 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-950/40 hover:bg-emerald-600/40";
+  if (score >= 16) return "bg-rose-600/25 border-rose-500 text-rose-300 shadow-lg hover:bg-rose-600/40";
+  if (score >= 10) return "bg-orange-600/25 border-orange-500 text-orange-300 shadow-lg hover:bg-orange-600/40";
+  if (score >= 5) return "bg-amber-600/25 border-amber-500 text-amber-300 shadow-lg hover:bg-amber-600/40";
+  return "bg-emerald-600/25 border-emerald-500 text-emerald-300 shadow-lg hover:bg-emerald-600/40";
 }
 
 export function filterRisksByHeatmapCell(risks: Risk[], likelihood: number, impact: number): Risk[] {

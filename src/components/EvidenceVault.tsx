@@ -127,7 +127,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
         <div>
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <FolderLock className="w-5 h-5 text-cyan-400" />
+            <FolderLock className="w-5 h-5 text-violet-400" />
             Central Audit Evidence Vault
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -137,7 +137,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
 
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-cyan-400/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/30 transition-all"
         >
           <UploadCloud className="w-4 h-4" />
           Upload Evidence Artifact
@@ -150,7 +150,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-bold text-white">Uploaded Compliance Artifacts</h2>
-            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 text-cyan-400 border border-slate-700">
+            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 text-violet-400 border border-slate-700">
               {filteredEvidences.length} Artifacts
             </span>
           </div>
@@ -177,14 +177,14 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                 className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-violet-400 shrink-0">
                     <FileCheck className="w-5 h-5" />
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-200 text-xs">{evidence.title}</span>
-                      <span className="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-cyan-400 border border-slate-700">
+                      <span className="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-violet-400 border border-slate-700">
                         {evidence.fileSize}
                       </span>
                     </div>
@@ -260,7 +260,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
             
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <UploadCloud className="w-4 h-4 text-cyan-400" />
+                <UploadCloud className="w-4 h-4 text-violet-400" />
                 Upload Audit Evidence Artifact
               </h2>
               <button
@@ -285,7 +285,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                     : "border-slate-800 bg-slate-950/60 hover:border-slate-700"
                 }`}
               >
-                <UploadCloud className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                <UploadCloud className="w-8 h-8 text-violet-400 mx-auto mb-2" />
                 <p className="text-sm font-bold text-slate-200 mb-1">
                   Drag and drop proof files here, or click to browse
                 </p>
@@ -344,7 +344,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                           onChange={() => handleToggleControl(c.id)}
                           className="rounded accent-cyan-500"
                         />
-                        <span className="font-bold text-cyan-400">{c.controlId}</span>
+                        <span className="font-bold text-violet-400">{c.controlId}</span>
                         <span>{c.title} ({c.framework})</span>
                       </label>
                     );
@@ -373,7 +373,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-cyan-400/30"
+                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/30"
                 >
                   Save Artifact
                 </button>

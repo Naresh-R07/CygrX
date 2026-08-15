@@ -39,7 +39,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
   const getAssetIcon = (assetType: AssetType) => {
     switch (assetType) {
       case "CLOUD_INFRA":
-        return <Cloud className="w-4 h-4 text-cyan-400" />;
+        return <Cloud className="w-4 h-4 text-violet-400" />;
       case "DATA_STORE":
         return <Database className="w-4 h-4 text-emerald-400" />;
       case "HARDWARE":
@@ -113,7 +113,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
         <div>
           <span className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">ASSET VAULT</span>
           <h1 className="text-xl font-extrabold text-white tracking-tight font-mono mt-0.5 flex items-center gap-2">
-            <Server className="w-5 h-5 text-indigo-400" />
+            <Server className="w-5 h-5 text-violet-400" />
             Enterprise Asset & Vendor Inventory Vault
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -123,7 +123,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-indigo-400/30 transition-all shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/30 transition-all shrink-0"
         >
           <PlusCircle className="w-4 h-4" />
           Register New Asset
@@ -136,7 +136,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-bold text-white">Tracked Enterprise Assets</h2>
-            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 text-cyan-400 border border-slate-700">
+            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 text-violet-400 border border-slate-700">
               {filteredAssets.length} Assets
             </span>
           </div>
@@ -194,7 +194,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
                 <h3 className="text-sm font-bold text-white leading-tight">{asset.name}</h3>
 
                 {asset.ipAddress && (
-                  <p className="text-sm font-mono text-cyan-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
+                  <p className="text-sm font-mono text-violet-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
                     {asset.ipAddress}
                   </p>
                 )}
@@ -244,7 +244,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
             
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Server className="w-4 h-4 text-cyan-400" />
+                <Server className="w-4 h-4 text-violet-400" />
                 Register New Enterprise Asset
               </h2>
               <button
@@ -344,7 +344,7 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md border border-violet-400/30"
+                  className="px-5 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/30"
                 >
                   Save Asset
                 </button>

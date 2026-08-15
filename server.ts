@@ -2,204 +2,45 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import fs from "fs";
+import http from "http";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
-import { generateWithFallback, resolveActiveModel, getMaxOutputTokens } from "./aiModels";
+import { initDatabase } from "./server/db/seed.js";
+import { broadcast } from "./server/ws/handler.js";
 
-// Project-defined model (metadata.json "aiModel") > env GEMINI_MODEL > registry default.
-function getProjectModelId(): string | undefined {
-  try {
-    const raw = fs.readFileSync(path.join(process.cwd(), "metadata.json"), "utf-8");
-    const meta = JSON.parse(raw);
-    return typeof meta.aiModel === "string" ? meta.aiModel : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-// Which model is active for this project (env var wins, then registry default)
-const ACTIVE_MODEL = resolveActiveModel(getProjectModelId());
+import authRoutes from "./server/routes/auth.js";
+import riskRoutes from "./server/routes/risks.js";
+import assetRoutes from "./server/routes/assets.js";
+import controlRoutes from "./server/routes/controls.js";
+import evidenceRoutes from "./server/routes/evidence.js";
+import incidentRoutes from "./server/routes/incidents.js";
 
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
+  console.log("[DB] Initializing database...");
+  initDatabase();
+
   app.use(express.json({ limit: "10mb" }));
 
-  // Initialize Gemini AI SDK safely (lazy check per request)
-  const getAiClient = () => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is missing.");
-    }
-    return new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-  };
-
-  // API Routes FIRST
+  // Health check
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  // AI Recommendation for Risk / Compliance Gap
-  app.post("/api/ai/recommend", async (req, res) => {
-    try {
-      const { title, description, likelihood, impact, assetName, assetType, framework, controlId } = req.body;
-
-      if (!process.env.GEMINI_API_KEY) {
-        return res.status(400).json({
-          error: "GEMINI_API_KEY is not configured in environment.",
-        });
-      }
-
-      const ai = getAiClient();
-
-      const prompt = `You are an enterprise ISO 27001:2022 and NIST CSF 2.0 Lead Security Auditor & Threat Modeling Expert.
-Analyze the following security risk/control context and provide structured JSON guidance:
-
-Target Context:
-- Risk/Control Title: ${title || controlId || "Security Risk"}
-- Description: ${description || "N/A"}
-- Severity Matrix: Likelihood=${likelihood || 3}/5, Impact=${impact || 3}/5
-- Affected Asset: ${assetName || "General System"} (${assetType || "Infrastructure"})
-- Target Framework: ${framework || "ISO 27001:2022 / NIST CSF 2.0"}
-
-Please analyze and return a strictly formatted JSON object with the following fields:
-{
-  "summary": "Brief executive threat analysis summary (1-2 sentences)",
-  "riskLevel": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
-  "suggestedActions": [
-    "Technical control implementation step 1",
-    "Administrative or policy control step 2",
-    "Monitoring or verification step 3"
-  ],
-  "recommendedControls": [
-    {"code": "ISO 27001 A.8.8", "name": "Management of technical vulnerabilities", "description": "Ensure timely patching and vulnerability scans."},
-    {"code": "NIST PR.AC-1", "name": "Access Control Policy", "description": "Enforce strict MFA and RBAC."}
-  ],
-  "mitigationPriority": "Immediate (24 hours)" | "Short-term (7 days)" | "Medium-term (30 days)"
-}`;
-
-      let parsed;
-      let usedModel = ACTIVE_MODEL;
-      try {
-        const { result: response, modelId } = await generateWithFallback(
-          (modelId) =>
-            ai.models.generateContent({
-              model: modelId,
-              contents: prompt,
-              config: {
-                responseMimeType: "application/json",
-                temperature: 0.2,
-                maxOutputTokens: getMaxOutputTokens(modelId),
-              },
-            }),
-          ACTIVE_MODEL
-        );
-        usedModel = modelId;
-        const responseText = response.text || "{}";
-        try {
-          parsed = JSON.parse(responseText);
-        } catch {
-          parsed = {
-            summary: responseText,
-            riskLevel: (likelihood * impact) >= 16 ? "CRITICAL" : (likelihood * impact) >= 9 ? "HIGH" : "MEDIUM",
-            suggestedActions: ["Implement automated scanning", "Restrict administrative access", "Enable continuous audit logging"],
-            recommendedControls: [{ code: "ISO 27001 A.5.15", name: "Access Control", description: "Enforce principle of least privilege" }],
-            mitigationPriority: "Short-term (7 days)"
-          };
-        }
-      } catch (fallbackErr: any) {
-        console.warn(`[AI] All models failed for /api/ai/recommend, using rule-based fallback: ${fallbackErr?.message || fallbackErr}`);
-        parsed = {
-          summary: "Unable to reach the AI model; using heuristic severity assessment.",
-          riskLevel: (likelihood * impact) >= 16 ? "CRITICAL" : (likelihood * impact) >= 9 ? "HIGH" : "MEDIUM",
-          suggestedActions: ["Implement automated scanning", "Restrict administrative access", "Enable continuous audit logging"],
-          recommendedControls: [{ code: "ISO 27001 A.5.15", name: "Access Control", description: "Enforce principle of least privilege" }],
-          mitigationPriority: "Short-term (7 days)"
-        };
-      }
-
-      return res.json({ success: true, recommendation: parsed, model: usedModel });
-    } catch (err: any) {
-      console.error("AI Recommendation Error:", err);
-      return res.status(500).json({ error: err.message || "Failed to generate AI recommendation" });
-    }
-  });
-
-  // AI GRC Advisor Chat Endpoint
-  app.post("/api/ai/chat", async (req, res) => {
-    try {
-      const { messages, contextData } = req.body;
-
-      if (!process.env.GEMINI_API_KEY) {
-        return res.status(400).json({
-          error: "GEMINI_API_KEY is missing. Please set your Gemini API key in Secrets.",
-        });
-      }
-
-      const ai = getAiClient();
-
-      const systemInstruction = `You are Aegis AI, an expert Senior Cybersecurity Risk Officer & GRC Specialist certified in ISO 27001:2022, NIST CSF 2.0, SOC 2 Type II, HIPAA, and GDPR.
-You assist cybersecurity teams, CISOs, and compliance auditors with threat modeling, risk evaluation, audit evidence preparation, asset classification, and regulatory alignment.
-
-Current Organization Security Snapshot:
-- Total Open Risks: ${contextData?.riskCount ?? "N/A"}
-- ISO 27001 Readiness: ${contextData?.isoScore ?? "78"}%
-- NIST CSF 2.0 Maturity: ${contextData?.nistScore ?? "82"}%
-- Critical Assets Tracked: ${contextData?.assetCount ?? "N/A"}
-- Active Incidents: ${contextData?.incidentCount ?? "0"}
-
-Provide authoritative, concise, actionable advice with bullet points and standard control references where appropriate. Keep responses clear and professional.`;
-
-      // Build conversation formatted prompt
-      const conversationPrompt = messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-      const fullPrompt = `${systemInstruction}\n\n${conversationPrompt}\n\nASSISTANT:`;
-
-      let reply = "";
-      let usedModel = ACTIVE_MODEL;
-      try {
-        const { result: response, modelId } = await generateWithFallback(
-          (modelId) =>
-            ai.models.generateContent({
-              model: modelId,
-              contents: fullPrompt,
-              config: {
-                temperature: 0.4,
-                maxOutputTokens: getMaxOutputTokens(modelId),
-              },
-            }),
-          ACTIVE_MODEL
-        );
-        usedModel = modelId;
-        reply = response.text || "I am analyzing your query. Please refine or retry.";
-      } catch (fallbackErr: any) {
-        console.warn(`[AI] All models failed for /api/ai/chat: ${fallbackErr?.message || fallbackErr}`);
-        reply = "I am currently unable to reach the AI model. Please check your GEMINI_API_KEY and try again.";
-      }
-
-      return res.json({
-        success: true,
-        reply,
-        model: usedModel,
-      });
-    } catch (err: any) {
-      console.error("AI Chat Error:", err);
-      return res.status(500).json({ error: err.message || "Error processing chat request" });
-    }
-  });
+  // CRUD API routes
+  app.use("/api/auth", authRoutes);
+  app.use("/api/risks", riskRoutes);
+  app.use("/api/assets", assetRoutes);
+  app.use("/api/controls", controlRoutes);
+  app.use("/api/evidence", evidenceRoutes);
+  app.use("/api/incidents", incidentRoutes);
 
   // Executive Report Data API
   app.post("/api/pdf/report", (req, res) => {
     const { orgName, risks, assets, compliance, incidents } = req.body;
     const reportData = {
-      title: `Executive Cybersecurity GRC Audit Briefing`,
+      title: "Executive Cybersecurity GRC Audit Briefing",
       organization: orgName || "Enterprise Corp",
       generatedAt: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       summary: {
@@ -216,6 +57,8 @@ Provide authoritative, concise, actionable advice with bullet points and standar
   });
 
   // Vite middleware setup
+  const server = http.createServer(app);
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -230,8 +73,14 @@ Provide authoritative, concise, actionable advice with bullet points and standar
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  // Initialize WebSocket
+  const { initWebSocket } = await import("./server/ws/handler.js");
+  initWebSocket(server);
+
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`[SERVER] CygrX SOC running on http://localhost:${PORT}`);
+    console.log(`[SERVER] WebSocket available at ws://localhost:${PORT}/ws`);
+    console.log(`[SERVER] API routes: /api/auth, /api/risks, /api/assets, /api/controls, /api/evidence, /api/incidents`);
   });
 }
 

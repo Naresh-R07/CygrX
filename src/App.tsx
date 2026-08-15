@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LoginPage } from "./pages/LoginPage";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { DashboardOverview } from "./components/DashboardOverview";
@@ -9,153 +11,97 @@ import { AssetInventory } from "./components/AssetInventory";
 import { EvidenceVault } from "./components/EvidenceVault";
 import { IncidentTracker } from "./components/IncidentTracker";
 import { AiSecurityAdvisor } from "./components/AiSecurityAdvisor";
-
-import { 
-  initialAssets, 
-  initialRisks, 
-  initialIsoControls, 
-  initialNistControls, 
-  initialEvidences, 
-  initialIncidents 
-} from "./data/initialGrcData";
-import { 
-  Asset, 
-  Control, 
-  Evidence, 
-  Incident, 
-  Risk, 
-  RiskStatus, 
-  ComplianceStatus, 
-  IncidentStatus, 
-  ViewTab 
-} from "./types";
-import { calculateRiskScore } from "./utils/riskEngine";
-
-// Safely read + parse JSON from localStorage with graceful fallback
-function loadFromStorage<T>(key: string, fallback: T): T {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? (JSON.parse(saved) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
+import { api } from "./api/client";
+import { useWebSocket } from "./hooks/useWebSocket";
+import { Asset, Control, Evidence, Incident, Risk, RiskStatus, ComplianceStatus, IncidentStatus, ViewTab } from "./types";
 
 function getViewportDetails() {
   const width = typeof window !== "undefined" ? window.innerWidth : 1280;
   const isMobile = width < 1024;
-  let deviceType = "PC";
-  if (width < 640) deviceType = "Mobile";
-  else if (width < 1024) deviceType = "Tablet";
-  else if (width >= 1920) deviceType = "UltraWide";
-  return { width, isMobile, deviceType };
+  return { width, isMobile };
 }
 
-export default function App() {
-  // Navigation tab
+function AppContent() {
+  const { user, loading: authLoading } = useAuth();
   const [currentTab, setCurrentTab] = useState<ViewTab>("dashboard");
-
-  // Realtime Device Ratio & Screen Width Detection State
   const [viewport, setViewport] = useState(getViewportDetails);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => !getViewportDetails().isMobile);
 
-  // Monitor Window & Container Resize Events seamlessly so changing tab ratio never breaks layouts
-  useEffect(() => {
-    const handleResize = () => {
-      const details = getViewportDetails();
-      setViewport(details);
-    };
+  const [risks, setRisks] = useState<Risk[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [isoControls, setIsoControls] = useState<Control[]>([]);
+  const [nistControls, setNistControls] = useState<Control[]>([]);
+  const [evidences, setEvidences] = useState<Evidence[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // GRC Core State with LocalStorage fallbacks
-  const [risks, setRisks] = useState<Risk[]>(() => loadFromStorage<Risk[]>("aegis_grc_risks", initialRisks));
-
-  const [assets, setAssets] = useState<Asset[]>(() => loadFromStorage<Asset[]>("aegis_grc_assets", initialAssets));
-
-  const [isoControls, setIsoControls] = useState<Control[]>(() => loadFromStorage<Control[]>("aegis_grc_iso", initialIsoControls));
-
-  const [nistControls, setNistControls] = useState<Control[]>(() => loadFromStorage<Control[]>("aegis_grc_nist", initialNistControls));
-
-  const [evidences, setEvidences] = useState<Evidence[]>(() => loadFromStorage<Evidence[]>("aegis_grc_evidences", initialEvidences));
-
-  const [incidents, setIncidents] = useState<Incident[]>(() => loadFromStorage<Incident[]>("aegis_grc_incidents", initialIncidents));
-
-  // Modal and active selection states
   const [isRiskModalOpen, setIsRiskModalOpen] = useState(false);
   const [editingRisk, setEditingRisk] = useState<Risk | null>(null);
   const [activeTargetRisk, setActiveTargetRisk] = useState<Risk | null>(null);
 
-  // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem("aegis_grc_risks", JSON.stringify(risks));
-  }, [risks]);
+    const handleResize = () => setViewport(getViewportDetails());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("aegis_grc_assets", JSON.stringify(assets));
-  }, [assets]);
-
-  useEffect(() => {
-    localStorage.setItem("aegis_grc_iso", JSON.stringify(isoControls));
-  }, [isoControls]);
-
-  useEffect(() => {
-    localStorage.setItem("aegis_grc_nist", JSON.stringify(nistControls));
-  }, [nistControls]);
-
-  useEffect(() => {
-    localStorage.setItem("aegis_grc_evidences", JSON.stringify(evidences));
-  }, [evidences]);
-
-  useEffect(() => {
-    localStorage.setItem("aegis_grc_incidents", JSON.stringify(incidents));
-  }, [incidents]);
-
-  // Actions
-  const handleSaveRisk = (riskData: Partial<Risk>) => {
-    if (riskData.id) {
-      // Update existing
-      setRisks((prev) =>
-        prev.map((r) => (r.id === riskData.id ? ({ ...r, ...riskData } as Risk) : r))
-      );
-    } else {
-      // Create new
-      const likelihood = riskData.likelihood || 3;
-      const impact = riskData.impact || 3;
-      const calcResult = calculateRiskScore(likelihood, impact);
-
-      const newRisk: Risk = {
-        id: `risk-${Date.now()}`,
-        title: riskData.title || "Untitled Risk",
-        description: riskData.description || "",
-        category: riskData.category || "Technical",
-        assetId: riskData.assetId || "",
-        assetName: riskData.assetName || "Global Asset",
-        likelihood,
-        impact,
-        riskScore: calcResult.score,
-        riskLevel: calcResult.level,
-        status: (riskData.status as RiskStatus) || "OPEN",
-        targetFrameworkControls: riskData.targetFrameworkControls || [],
-        mitigationPlan: riskData.mitigationPlan || "",
-        assignee: riskData.assignee || "SecOps Team",
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
-      };
-
-      setRisks((prev) => [newRisk, ...prev]);
+  const loadData = useCallback(async () => {
+    if (!user) return;
+    setDataLoading(true);
+    try {
+      const [risksRes, assetsRes, isoRes, nistRes, evidenceRes, incidentsRes] = await Promise.all([
+        api.risks.list(),
+        api.assets.list(),
+        api.controls.list("ISO_27001"),
+        api.controls.list("NIST_CSF_2"),
+        api.evidence.list(),
+        api.incidents.list(),
+      ]);
+      setRisks(risksRes.risks);
+      setAssets(assetsRes.assets);
+      setIsoControls(isoRes.controls);
+      setNistControls(nistRes.controls);
+      setEvidences(evidenceRes.evidences);
+      setIncidents(incidentsRes.incidents);
+    } catch (err) {
+      console.error("Failed to load data:", err);
+    } finally {
+      setDataLoading(false);
     }
+  }, [user]);
 
-    setIsRiskModalOpen(false);
-    setEditingRisk(null);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  useWebSocket((event) => {
+    if (event.entity === "risk") loadData();
+    if (event.entity === "incident") loadData();
+    if (event.entity === "asset") loadData();
+    if (event.entity === "control") loadData();
+    if (event.entity === "evidence") loadData();
+  });
+
+  const handleSaveRisk = async (riskData: Partial<Risk>) => {
+    try {
+      if (riskData.id) {
+        await api.risks.update(riskData.id, riskData);
+      } else {
+        await api.risks.create(riskData);
+      }
+      await loadData();
+      setIsRiskModalOpen(false);
+      setEditingRisk(null);
+    } catch (err) {
+      console.error("Failed to save risk:", err);
+    }
   };
 
-  const handleUpdateRiskStatus = (riskId: string, status: RiskStatus) => {
-    setRisks((prev) =>
-      prev.map((r) => (r.id === riskId ? { ...r, status, updatedAt: new Date().toISOString().split("T")[0] } : r))
-    );
+  const handleUpdateRiskStatus = async (riskId: string, status: RiskStatus) => {
+    try {
+      await api.risks.update(riskId, { status });
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update risk:", err);
+    }
   };
 
   const handleRequestAiAdviceForRisk = (risk: Risk) => {
@@ -163,91 +109,106 @@ export default function App() {
     setCurrentTab("ai-advisor");
   };
 
-  const handleUpdateIsoControlStatus = (controlId: string, status: ComplianceStatus) => {
-    setIsoControls((prev) =>
-      prev.map((c) => (c.id === controlId ? { ...c, status } : c))
-    );
+  const handleUpdateIsoControlStatus = async (controlId: string, status: ComplianceStatus) => {
+    try {
+      await api.controls.update(controlId, { status });
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update control:", err);
+    }
   };
 
-  const handleUpdateNistControlStatus = (controlId: string, status: ComplianceStatus) => {
-    setNistControls((prev) =>
-      prev.map((c) => (c.id === controlId ? { ...c, status } : c))
-    );
+  const handleUpdateNistControlStatus = async (controlId: string, status: ComplianceStatus) => {
+    try {
+      await api.controls.update(controlId, { status });
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update control:", err);
+    }
   };
 
-  const handleAddAsset = (assetData: Partial<Asset>) => {
-    const newAsset: Asset = {
-      id: `asset-${Date.now()}`,
-      name: assetData.name || "New Asset",
-      type: assetData.type || "CLOUD_INFRA",
-      criticality: assetData.criticality || "MEDIUM",
-      owner: assetData.owner || "IT Ops",
-      department: assetData.department || "Engineering",
-      location: assetData.location || "US-East (Cloud)",
-      riskCount: 0,
-      incidentCount: 0,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setAssets((prev) => [newAsset, ...prev]);
+  const handleAddAsset = async (assetData: Partial<Asset>) => {
+    try {
+      await api.assets.create(assetData);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to add asset:", err);
+    }
   };
 
-  const handleDeleteAsset = (assetId: string) => {
-    setAssets((prev) => prev.filter((a) => a.id !== assetId));
+  const handleDeleteAsset = async (assetId: string) => {
+    try {
+      await api.assets.delete(assetId);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to delete asset:", err);
+    }
   };
 
-  const handleAddEvidence = (evidenceData: Partial<Evidence>) => {
-    const newEvidence: Evidence = {
-      id: `ev-${Date.now()}`,
-      title: evidenceData.title || "Uploaded Evidence",
-      fileName: evidenceData.fileName || "evidence_doc.pdf",
-      fileType: evidenceData.fileType || "PDF",
-      fileSize: evidenceData.fileSize || "1.2 MB",
-      uploadedBy: evidenceData.uploadedBy || "Security Lead",
-      uploadedAt: new Date().toISOString().split("T")[0],
-      linkedControlIds: evidenceData.linkedControlIds || [],
-    };
-    setEvidences((prev) => [newEvidence, ...prev]);
+  const handleAddEvidence = async (evidenceData: Partial<Evidence>) => {
+    try {
+      const formData = new FormData();
+      if (evidenceData.title) formData.append("title", evidenceData.title);
+      if (evidenceData.uploadedBy) formData.append("uploadedBy", evidenceData.uploadedBy);
+      if (evidenceData.linkedControlIds) formData.append("linkedControlIds", JSON.stringify(evidenceData.linkedControlIds));
+      if (evidenceData.notes) formData.append("notes", evidenceData.notes);
+      await api.evidence.upload(formData);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to add evidence:", err);
+    }
   };
 
-  const handleDeleteEvidence = (evidenceId: string) => {
-    setEvidences((prev) => prev.filter((e) => e.id !== evidenceId));
+  const handleDeleteEvidence = async (evidenceId: string) => {
+    try {
+      await api.evidence.delete(evidenceId);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to delete evidence:", err);
+    }
   };
 
-  const handleAddIncident = (incidentData: Partial<Incident>) => {
-    const newIncident: Incident = {
-      id: `inc-${Date.now()}`,
-      title: incidentData.title || "Security Alert",
-      severity: incidentData.severity || "HIGH",
-      status: "NEW",
-      description: incidentData.description || "",
-      reporter: incidentData.reporter || "SOC Auto-Detector",
-      reportedAt: new Date().toISOString().replace("T", " ").substring(0, 16),
-      assetId: incidentData.assetId || "",
-    };
-    setIncidents((prev) => [newIncident, ...prev]);
+  const handleAddIncident = async (incidentData: Partial<Incident>) => {
+    try {
+      await api.incidents.create(incidentData);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to add incident:", err);
+    }
   };
 
-  const handleUpdateIncidentStatus = (incidentId: string, status: IncidentStatus) => {
-    setIncidents((prev) =>
-      prev.map((i) => (i.id === incidentId ? { ...i, status } : i))
-    );
+  const handleUpdateIncidentStatus = async (incidentId: string, status: IncidentStatus) => {
+    try {
+      await api.incidents.update(incidentId, { status });
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update incident:", err);
+    }
   };
 
   const openRisksCount = risks.filter((r) => r.status === "OPEN" || r.status === "UNDER_REVIEW").length;
   const criticalRisksCount = risks.filter((r) => r.riskScore >= 16).length;
   const openIncidentsCount = incidents.filter((i) => i.status !== "CLOSED").length;
 
+  if (authLoading || dataLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-slate-400 font-mono">Loading CygrX SOC...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <LoginPage />;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-violet-500 selection:text-white">
-      
-      {/* Top Header with Navbar Toggle & Device Ratio Detector */}
       <Header
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
-        onOpenNewRiskModal={() => {
-          setEditingRisk(null);
-          setIsRiskModalOpen(true);
-        }}
+        onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }}
         openIncidentsCount={openIncidentsCount}
         criticalRisksCount={criticalRisksCount}
         isSidebarOpen={isSidebarOpen}
@@ -255,10 +216,7 @@ export default function App() {
         isMobile={viewport.isMobile}
       />
 
-      {/* Main Body Layout with Collapsible/Mobile Drawer Sidebar */}
       <div className="flex flex-1 relative overflow-x-hidden">
-        
-        {/* Sidebar Navigation */}
         <Sidebar
           currentTab={currentTab}
           onSelectTab={setCurrentTab}
@@ -269,122 +227,43 @@ export default function App() {
           isMobile={viewport.isMobile}
         />
 
-        {/* Content View Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-x-hidden min-w-0 transition-all">
           {currentTab === "dashboard" && (
-            <DashboardOverview
-              risks={risks}
-              assets={assets}
-              isoControls={isoControls}
-              nistControls={nistControls}
-              incidents={incidents}
-              onSelectTab={setCurrentTab}
-              onSelectRisk={(risk) => {
-                setEditingRisk(risk);
-                setIsRiskModalOpen(true);
-              }}
-              onOpenNewRiskModal={() => {
-                setEditingRisk(null);
-                setIsRiskModalOpen(true);
-              }}
-            />
+            <DashboardOverview risks={risks} assets={assets} isoControls={isoControls} nistControls={nistControls} incidents={incidents} onSelectTab={setCurrentTab} onSelectRisk={(risk) => { setEditingRisk(risk); setIsRiskModalOpen(true); }} onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }} />
           )}
-
           {currentTab === "risk-matrix" && (
-            <RiskMatrixHeatmap
-              risks={risks}
-              onOpenNewRiskModal={() => {
-                setEditingRisk(null);
-                setIsRiskModalOpen(true);
-              }}
-              onSelectRisk={(risk) => {
-                setEditingRisk(risk);
-                setIsRiskModalOpen(true);
-              }}
-              onUpdateRiskStatus={handleUpdateRiskStatus}
-              onRequestAiAdvice={handleRequestAiAdviceForRisk}
-            />
+            <RiskMatrixHeatmap risks={risks} onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }} onSelectRisk={(risk) => { setEditingRisk(risk); setIsRiskModalOpen(true); }} onUpdateRiskStatus={handleUpdateRiskStatus} onRequestAiAdvice={handleRequestAiAdviceForRisk} />
           )}
-
           {currentTab === "compliance-iso" && (
-            <ComplianceTracker
-              framework="ISO_27001"
-              controls={isoControls}
-              evidences={evidences}
-              onUpdateControlStatus={handleUpdateIsoControlStatus}
-              onRequestAiGapAnalysis={() => {
-                setCurrentTab("ai-advisor");
-              }}
-            />
+            <ComplianceTracker framework="ISO_27001" controls={isoControls} evidences={evidences} onUpdateControlStatus={handleUpdateIsoControlStatus} onRequestAiGapAnalysis={() => setCurrentTab("ai-advisor")} />
           )}
-
           {currentTab === "compliance-nist" && (
-            <ComplianceTracker
-              framework="NIST_CSF_2"
-              controls={nistControls}
-              evidences={evidences}
-              onUpdateControlStatus={handleUpdateNistControlStatus}
-              onRequestAiGapAnalysis={() => {
-                setCurrentTab("ai-advisor");
-              }}
-            />
+            <ComplianceTracker framework="NIST_CSF_2" controls={nistControls} evidences={evidences} onUpdateControlStatus={handleUpdateNistControlStatus} onRequestAiGapAnalysis={() => setCurrentTab("ai-advisor")} />
           )}
-
           {currentTab === "assets" && (
-            <AssetInventory
-              assets={assets}
-              onAddAsset={handleAddAsset}
-              onDeleteAsset={handleDeleteAsset}
-            />
+            <AssetInventory assets={assets} onAddAsset={handleAddAsset} onDeleteAsset={handleDeleteAsset} />
           )}
-
           {currentTab === "evidence" && (
-            <EvidenceVault
-              evidences={evidences}
-              isoControls={isoControls}
-              nistControls={nistControls}
-              onAddEvidence={handleAddEvidence}
-              onDeleteEvidence={handleDeleteEvidence}
-            />
+            <EvidenceVault evidences={evidences} isoControls={isoControls} nistControls={nistControls} onAddEvidence={handleAddEvidence} onDeleteEvidence={handleDeleteEvidence} />
           )}
-
           {currentTab === "incidents" && (
-            <IncidentTracker
-              incidents={incidents}
-              assets={assets}
-              onAddIncident={handleAddIncident}
-              onUpdateIncidentStatus={handleUpdateIncidentStatus}
-            />
+            <IncidentTracker incidents={incidents} assets={assets} onAddIncident={handleAddIncident} onUpdateIncidentStatus={handleUpdateIncidentStatus} />
           )}
-
           {currentTab === "ai-advisor" && (
-            <AiSecurityAdvisor
-              risks={risks}
-              isoControls={isoControls}
-              nistControls={nistControls}
-              assets={assets}
-              incidents={incidents}
-              activeTargetRisk={activeTargetRisk}
-              onClearTargetRisk={() => setActiveTargetRisk(null)}
-            />
+            <AiSecurityAdvisor risks={risks} isoControls={isoControls} nistControls={nistControls} assets={assets} incidents={incidents} activeTargetRisk={activeTargetRisk} onClearTargetRisk={() => setActiveTargetRisk(null)} />
           )}
-
         </main>
-
       </div>
 
-      {/* Log/Edit Risk Drawer Modal */}
-      <RiskModal
-        isOpen={isRiskModalOpen}
-        onClose={() => {
-          setIsRiskModalOpen(false);
-          setEditingRisk(null);
-        }}
-        onSaveRisk={handleSaveRisk}
-        assets={assets}
-        editingRisk={editingRisk}
-      />
-
+      <RiskModal isOpen={isRiskModalOpen} onClose={() => { setIsRiskModalOpen(false); setEditingRisk(null); }} onSaveRisk={handleSaveRisk} assets={assets} editingRisk={editingRisk} />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
