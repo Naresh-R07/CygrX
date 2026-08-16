@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { getDb } from "./connection.js";
 import fs from "fs";
 import path from "path";
@@ -21,8 +22,8 @@ export function initDatabase(): void {
 }
 
 function seedDefaultUser(db: ReturnType<typeof getDb>): void {
-  const bcrypt = require("bcrypt");
-  const hash = bcrypt.hashSync("admin123", 10);
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const hash = bcrypt.hashSync(adminPassword, 10);
 
   db.prepare(`
     INSERT INTO users (id, email, password_hash, name, role)

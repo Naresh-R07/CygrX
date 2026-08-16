@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getDb } from "../db/connection.js";
 import { AuthRequest, authenticateToken, requireRole } from "../middleware/auth.js";
+import { broadcast } from "../ws/handler.js";
 import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
@@ -45,6 +46,7 @@ router.post("/", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req, res) 
 
     const asset = db.prepare("SELECT * FROM assets WHERE id = ?").get(id);
     res.status(201).json({ asset });
+    broadcast({ type: "created", entity: "asset" });
   } catch (err: any) {
     console.error("Create asset error:", err);
     res.status(500).json({ error: "Failed to create asset" });
@@ -69,6 +71,7 @@ router.put("/:id", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req, res
 
     const asset = db.prepare("SELECT * FROM assets WHERE id = ?").get(req.params.id);
     res.json({ asset });
+    broadcast({ type: "updated", entity: "asset" });
   } catch (err: any) {
     console.error("Update asset error:", err);
     res.status(500).json({ error: "Failed to update asset" });
@@ -83,6 +86,7 @@ router.delete("/:id", authenticateToken, requireRole("ADMIN"), (req, res) => {
     return;
   }
   res.json({ success: true });
+  broadcast({ type: "deleted", entity: "asset" });
 });
 
 export default router;

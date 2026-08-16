@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { getDb } from "../db/connection.js";
 import { AuthRequest, authenticateToken, requireRole } from "../middleware/auth.js";
+import { broadcast } from "../ws/handler.js";
 import { v4 as uuidv4 } from "uuid";
 
 const UPLOAD_DIR = path.join(process.cwd(), "server", "uploads");
@@ -15,8 +16,8 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
   filename: (_req, file, cb) => {
     const unique = uuidv4().slice(0, 8);
-    const ext = path.extname(file.originalname);
-    cb(null, `${unique}-${file.originalname}`);
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${unique}${ext}`);
   },
 });
 
@@ -59,7 +60,7 @@ router.post("/", authenticateToken, requireRole("ADMIN", "AUDITOR"), upload.sing
   try {
     const db = getDb();
     const id = `ev-${uuidv4().slice(0, 8)}`;
-    const { title, uploadedBy, linkedControlIds, notes } = req.body;
+    const { title, linkedControlIds, notes } = req.body;
 
     const file = req.file;
     const fileName = file?.originalname || "unknown";
@@ -70,10 +71,11 @@ router.post("/", authenticateToken, requireRole("ADMIN", "AUDITOR"), upload.sing
     db.prepare(`
       INSERT INTO evidence (id, title, file_name, file_size, file_type, uploaded_by, linked_control_ids, notes, file_path)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, title || fileName, fileName, fileSize, fileType, uploadedBy || "System", linkedControlIds || "[]", notes || "", filePath);
+    `).run(id, title || fileName, fileName, fileSize, fileType, req.user?.name || "System", linkedControlIds || "[]", notes || "", filePath);
 
     const evidence = db.prepare("SELECT * FROM evidence WHERE id = ?").get(id) as any;
     res.status(201).json({ evidence: { ...evidence, linkedControlIds: JSON.parse(evidence.linked_control_ids || "[]") } });
+    broadcast({ type: "created", entity: "evidence" });
   } catch (err: any) {
     console.error("Create evidence error:", err);
     res.status(500).json({ error: "Failed to upload evidence" });
@@ -114,6 +116,7 @@ router.delete("/:id", authenticateToken, requireRole("ADMIN"), (req, res) => {
     return;
   }
   res.json({ success: true });
+  broadcast({ type: "deleted", entity: "evidence" });
 });
 
 export default router;

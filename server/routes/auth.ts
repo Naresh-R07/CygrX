@@ -1,5 +1,6 @@
 import { Router, Response } from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { getDb } from "../db/connection.js";
 import { signToken, signRefreshToken, AuthRequest, authenticateToken } from "../middleware/auth.js";
 import { v4 as uuidv4 } from "uuid";
@@ -82,8 +83,11 @@ router.post("/refresh", (req, res) => {
       return;
     }
 
-    const jwt = require("jsonwebtoken");
-    const JWT_SECRET = process.env.JWT_SECRET || "cygrx-production-secret-change-me";
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      res.status(500).json({ error: "Server configuration error" });
+      return;
+    }
     const decoded = jwt.verify(refreshToken, JWT_SECRET) as any;
 
     if (decoded.type !== "refresh") {

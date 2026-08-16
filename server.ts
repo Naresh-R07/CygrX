@@ -5,7 +5,6 @@ import fs from "fs";
 import http from "http";
 import { createServer as createViteServer } from "vite";
 import { initDatabase } from "./server/db/seed.js";
-import { broadcast } from "./server/ws/handler.js";
 
 import authRoutes from "./server/routes/auth.js";
 import riskRoutes from "./server/routes/risks.js";

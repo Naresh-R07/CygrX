@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getDb } from "../db/connection.js";
 import { AuthRequest, authenticateToken, requireRole } from "../middleware/auth.js";
+import { broadcast } from "../ws/handler.js";
 import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
@@ -65,6 +66,7 @@ router.post("/", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req: AuthR
 
     const risk = db.prepare("SELECT * FROM risks WHERE id = ?").get(id) as any;
     res.status(201).json({ risk: { ...risk, targetFrameworkControls: JSON.parse(risk.target_framework_controls || "[]") } });
+    broadcast({ type: "created", entity: "risk" });
   } catch (err: any) {
     console.error("Create risk error:", err);
     res.status(500).json({ error: "Failed to create risk" });
@@ -103,6 +105,7 @@ router.put("/:id", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req: Aut
 
     const risk = db.prepare("SELECT * FROM risks WHERE id = ?").get(req.params.id) as any;
     res.json({ risk: { ...risk, targetFrameworkControls: JSON.parse(risk.target_framework_controls || "[]") } });
+    broadcast({ type: "updated", entity: "risk" });
   } catch (err: any) {
     console.error("Update risk error:", err);
     res.status(500).json({ error: "Failed to update risk" });
@@ -117,6 +120,7 @@ router.delete("/:id", authenticateToken, requireRole("ADMIN"), (req, res) => {
     return;
   }
   res.json({ success: true });
+  broadcast({ type: "deleted", entity: "risk" });
 });
 
 export default router;

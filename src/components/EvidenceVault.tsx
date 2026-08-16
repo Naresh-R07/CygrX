@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { 
   FolderLock, 
   UploadCloud, 
-  FileText, 
-  Link2, 
   Download, 
   Trash2, 
   CheckCircle2, 
@@ -12,6 +10,7 @@ import {
   FileCheck
 } from "lucide-react";
 import { Evidence, Control } from "../types";
+import { api } from "../api/client";
 
 interface EvidenceVaultProps {
   evidences: Evidence[];
@@ -40,6 +39,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
   const [selectedControlIds, setSelectedControlIds] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [dragActive, setDragActive] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const allControls = [...isoControls, ...nistControls];
 
@@ -72,6 +72,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       setFileName(file.name);
+      setSelectedFile(file);
       setTitle(file.name.replace(/\.[^/.]+$/, "") + " Audit Artifact");
       const mb = (file.size / (1024 * 1024)).toFixed(2);
       setFileSize(`${mb} MB`);
@@ -82,6 +83,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFileName(file.name);
+      setSelectedFile(file);
       setTitle(file.name.replace(/\.[^/.]+$/, "") + " Audit Artifact");
       const mb = (file.size / (1024 * 1024)).toFixed(2);
       setFileSize(`${mb} MB`);
@@ -109,8 +111,9 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
       uploadedBy,
       uploadedAt: new Date().toISOString().split("T")[0],
       linkedControlIds: selectedControlIds,
-      notes: notes || "Uploaded into central MinIO S3 Audit Vault.",
-    });
+      notes: notes || "Uploaded into central Audit Vault.",
+      file: selectedFile || undefined,
+    } as any);
 
     // Reset
     setTitle("");
@@ -222,10 +225,9 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
 
                   <button
                     onClick={() => {
-                      setDownloadNotice(`Presigned download link generated for "${evidence.fileName}". Check your email/S3 notification.`);
-                      window.setTimeout(() => setDownloadNotice(null), 4000);
+                      window.open(api.evidence.download(evidence.id), "_blank");
                     }}
-                    className="px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition-all flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-slate-700 text-violet-300 border border-slate-700 transition-all flex items-center gap-1.5"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download
@@ -296,6 +298,7 @@ export const EvidenceVault: React.FC<EvidenceVaultProps> = ({
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload-input"
+                  accept=".pdf,.csv,.png,.jpg,.jpeg,.json,.txt,.docx,.xlsx"
                 />
                 <label
                   htmlFor="file-upload-input"

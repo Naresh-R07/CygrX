@@ -145,13 +145,14 @@ function AppContent() {
     }
   };
 
-  const handleAddEvidence = async (evidenceData: Partial<Evidence>) => {
+  const handleAddEvidence = async (evidenceData: Partial<Evidence> & { file?: File }) => {
     try {
       const formData = new FormData();
       if (evidenceData.title) formData.append("title", evidenceData.title);
       if (evidenceData.uploadedBy) formData.append("uploadedBy", evidenceData.uploadedBy);
       if (evidenceData.linkedControlIds) formData.append("linkedControlIds", JSON.stringify(evidenceData.linkedControlIds));
       if (evidenceData.notes) formData.append("notes", evidenceData.notes);
+      if (evidenceData.file) formData.append("file", evidenceData.file);
       await api.evidence.upload(formData);
       await loadData();
     } catch (err) {
@@ -210,7 +211,6 @@ function AppContent() {
         onSelectTab={setCurrentTab}
         onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }}
         openIncidentsCount={openIncidentsCount}
-        criticalRisksCount={criticalRisksCount}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         isMobile={viewport.isMobile}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface WsEvent {
   type: string;
@@ -81,10 +81,4 @@ export function useWebSocket(onEvent?: EventHandler) {
   }, []);
 
   return { connected };
-}
-
-export function broadcastWsEvent(event: WsEvent): void {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(event));
-  }
 }

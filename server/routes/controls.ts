@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getDb } from "../db/connection.js";
 import { AuthRequest, authenticateToken, requireRole } from "../middleware/auth.js";
+import { broadcast } from "../ws/handler.js";
 
 const router = Router();
 
@@ -49,6 +50,7 @@ router.put("/:id", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req, res
 
     const control = db.prepare("SELECT * FROM controls WHERE id = ?").get(req.params.id) as any;
     res.json({ control: { ...control, evidenceIds: JSON.parse(control.evidence_ids || "[]") } });
+    broadcast({ type: "updated", entity: "control" });
   } catch (err: any) {
     console.error("Update control error:", err);
     res.status(500).json({ error: "Failed to update control" });

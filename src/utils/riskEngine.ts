@@ -55,7 +55,3 @@ export function getHeatmapCellColor(likelihood: number, impact: number, count: n
   if (score >= 5) return "bg-amber-600/25 border-amber-500 text-amber-300 shadow-lg hover:bg-amber-600/40";
   return "bg-emerald-600/25 border-emerald-500 text-emerald-300 shadow-lg hover:bg-emerald-600/40";
 }
-
-export function filterRisksByHeatmapCell(risks: Risk[], likelihood: number, impact: number): Risk[] {
-  return risks.filter((r) => r.likelihood === likelihood && r.impact === impact);
-}

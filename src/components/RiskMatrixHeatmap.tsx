@@ -5,7 +5,7 @@ import {
   Search, 
   Sparkles 
 } from "lucide-react";
-import { Risk, RiskLevel, RiskStatus } from "../types";
+import { Risk, RiskStatus } from "../types";
 import { calculateRiskScore, getHeatmapCellColor } from "../utils/riskEngine";
 
 interface RiskMatrixHeatmapProps {

@@ -15,7 +15,6 @@ interface HeaderProps {
   onSelectTab: (tab: ViewTab) => void;
   onOpenNewRiskModal: () => void;
   openIncidentsCount: number;
-  criticalRisksCount: number;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   isMobile: boolean;

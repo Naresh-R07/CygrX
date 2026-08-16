@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getDb } from "../db/connection.js";
 import { AuthRequest, authenticateToken, requireRole } from "../middleware/auth.js";
+import { broadcast } from "../ws/handler.js";
 import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
@@ -59,6 +60,7 @@ router.post("/", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req, res) 
 
     const incident = db.prepare("SELECT * FROM incidents WHERE id = ?").get(id) as any;
     res.status(201).json({ incident: { ...incident, actionItems: JSON.parse(incident.action_items || "[]") } });
+    broadcast({ type: "created", entity: "incident" });
   } catch (err: any) {
     console.error("Create incident error:", err);
     res.status(500).json({ error: "Failed to create incident" });
@@ -92,6 +94,7 @@ router.put("/:id", authenticateToken, requireRole("ADMIN", "AUDITOR"), (req, res
 
     const incident = db.prepare("SELECT * FROM incidents WHERE id = ?").get(req.params.id) as any;
     res.json({ incident: { ...incident, actionItems: JSON.parse(incident.action_items || "[]") } });
+    broadcast({ type: "updated", entity: "incident" });
   } catch (err: any) {
     console.error("Update incident error:", err);
     res.status(500).json({ error: "Failed to update incident" });
@@ -106,6 +109,7 @@ router.delete("/:id", authenticateToken, requireRole("ADMIN"), (req, res) => {
     return;
   }
   res.json({ success: true });
+  broadcast({ type: "deleted", entity: "incident" });
 });
 
 export default router;
