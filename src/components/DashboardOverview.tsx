@@ -68,7 +68,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             Enterprise Cybersecurity Threat & GRC Operations Command
           </h1>
           <p className="text-sm text-slate-300 max-w-2xl mt-1.5 font-mono leading-relaxed">
-            Continuous threat vector defense, real-time 5x5 matrix risk exposure, ISO 27001 & NIST CSF 2.0 readiness, and AI SOC intelligence.
+            Continuous threat vector defense, real-time risk matrix exposure, ISO 27001 & NIST CSF 2.0 readiness, and AI SOC intelligence.
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-800/90 flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-300">Open 5x5 Heatmap</span>
+            <span className="text-slate-300">Open Threat Heatmap</span>
             <span className="text-violet-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
               View Matrix <ArrowUpRight className="w-4 h-4" />
             </span>

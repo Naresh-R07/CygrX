@@ -88,7 +88,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
           </span>
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 font-mono mt-0.5 text-gradient-violet">
             <Grid3X3 className="w-5 h-5 text-violet-400" />
-            5x5 Risk Matrix & Threat Heatmap
+            Risk Matrix & Threat Heatmap
           </h1>
           <p className="text-sm text-slate-300 mt-1 font-mono">
             Enterprise threat severity matrix (Risk Score = Likelihood × Impact). Click matrix cells to filter active risk vectors.
@@ -118,7 +118,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
       <div className="cyber-card p-6 rounded-3xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-white font-mono">5x5 Enterprise Threat Matrix Grid</span>
+            <span className="text-sm font-bold text-white font-mono">Enterprise Threat Matrix Grid</span>
             <span className="text-xs text-slate-400 font-mono">(Y-Axis: Likelihood | X-Axis: Impact)</span>
           </div>
 
@@ -243,12 +243,12 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500"
             >
-              <option value="ALL">All Statuses</option>
-              <option value="OPEN">Open</option>
-              <option value="UNDER_REVIEW">Under Review</option>
-              <option value="MITIGATED">Mitigated</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="TRANSFERRED">Transferred</option>
+              <option value="ALL" className="bg-slate-900 text-slate-200">All Statuses</option>
+              <option value="OPEN" className="bg-slate-900 text-slate-200">Open</option>
+              <option value="UNDER_REVIEW" className="bg-slate-900 text-slate-200">Under Review</option>
+              <option value="MITIGATED" className="bg-slate-900 text-slate-200">Mitigated</option>
+              <option value="ACCEPTED" className="bg-slate-900 text-slate-200">Accepted</option>
+              <option value="TRANSFERRED" className="bg-slate-900 text-slate-200">Transferred</option>
             </select>
 
             {/* Severity Level Filter */}
@@ -257,11 +257,11 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
               onChange={(e) => setSelectedLevel(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500"
             >
-              <option value="ALL">All Severity Levels</option>
-              <option value="CRITICAL">Critical (16-25)</option>
-              <option value="HIGH">High (10-15)</option>
-              <option value="MEDIUM">Medium (5-9)</option>
-              <option value="LOW">Low (1-4)</option>
+              <option value="ALL" className="bg-slate-900 text-slate-200">All Severity Levels</option>
+              <option value="CRITICAL" className="bg-slate-900 text-slate-200">Critical (16-25)</option>
+              <option value="HIGH" className="bg-slate-900 text-slate-200">High (10-15)</option>
+              <option value="MEDIUM" className="bg-slate-900 text-slate-200">Medium (5-9)</option>
+              <option value="LOW" className="bg-slate-900 text-slate-200">Low (1-4)</option>
             </select>
           </div>
         </div>
@@ -329,11 +329,11 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                           onChange={(e) => onUpdateRiskStatus(risk.id, e.target.value as RiskStatus)}
                           className="bg-slate-950 border border-slate-700/80 rounded-md px-2 py-1 text-xs font-semibold text-slate-200 focus:outline-none focus:border-cyan-500"
                         >
-                          <option value="OPEN">Open</option>
-                          <option value="UNDER_REVIEW">Under Review</option>
-                          <option value="MITIGATED">Mitigated</option>
-                          <option value="ACCEPTED">Accepted</option>
-                          <option value="TRANSFERRED">Transferred</option>
+                          <option value="OPEN" className="bg-slate-900 text-slate-200">Open</option>
+                          <option value="UNDER_REVIEW" className="bg-slate-900 text-slate-200">Under Review</option>
+                          <option value="MITIGATED" className="bg-slate-900 text-slate-200">Mitigated</option>
+                          <option value="ACCEPTED" className="bg-slate-900 text-slate-200">Accepted</option>
+                          <option value="TRANSFERRED" className="bg-slate-900 text-slate-200">Transferred</option>
                         </select>
                       </td>
 
@@ -341,7 +341,7 @@ export const RiskMatrixHeatmap: React.FC<RiskMatrixHeatmapProps> = ({
                         {risk.assignee}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right space-x-2">
+                      <td className="py-3.5 px-4 text-right space-x-3">
                         <button
                           onClick={() => onRequestAiAdvice(risk)}
                           className="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all inline-flex items-center gap-1"

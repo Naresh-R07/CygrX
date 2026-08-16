@@ -158,12 +158,12 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
               onChange={(e) => setSelectedTypeFilter(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500"
             >
-              <option value="ALL">All Asset Types</option>
-              <option value="CLOUD_INFRA">Cloud Infrastructure</option>
-              <option value="DATA_STORE">Database & Storage</option>
-              <option value="SOFTWARE">Software & APIs</option>
-              <option value="HARDWARE">Hardware Fleet</option>
-              <option value="THIRD_PARTY_VENDOR">Third-Party SaaS Vendors</option>
+              <option value="ALL" className="bg-slate-900 text-slate-200">All Asset Types</option>
+              <option value="CLOUD_INFRA" className="bg-slate-900 text-slate-200">Cloud Infrastructure</option>
+              <option value="DATA_STORE" className="bg-slate-900 text-slate-200">Database & Storage</option>
+              <option value="SOFTWARE" className="bg-slate-900 text-slate-200">Software & APIs</option>
+              <option value="HARDWARE" className="bg-slate-900 text-slate-200">Hardware Fleet</option>
+              <option value="THIRD_PARTY_VENDOR" className="bg-slate-900 text-slate-200">Third-Party SaaS Vendors</option>
             </select>
           </div>
         </div>
@@ -276,11 +276,11 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
                     onChange={(e) => setType(e.target.value as AssetType)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
                   >
-                    <option value="CLOUD_INFRA">Cloud Infrastructure</option>
-                    <option value="DATA_STORE">Database / Storage</option>
-                    <option value="SOFTWARE">Software / Microservice</option>
-                    <option value="HARDWARE">Hardware Device</option>
-                    <option value="THIRD_PARTY_VENDOR">Third-Party SaaS Vendor</option>
+                    <option value="CLOUD_INFRA" className="bg-slate-900 text-slate-200">Cloud Infrastructure</option>
+                    <option value="DATA_STORE" className="bg-slate-900 text-slate-200">Database / Storage</option>
+                    <option value="SOFTWARE" className="bg-slate-900 text-slate-200">Software / Microservice</option>
+                    <option value="HARDWARE" className="bg-slate-900 text-slate-200">Hardware Device</option>
+                    <option value="THIRD_PARTY_VENDOR" className="bg-slate-900 text-slate-200">Third-Party SaaS Vendor</option>
                   </select>
                 </div>
 
@@ -291,10 +291,10 @@ export const AssetInventory: React.FC<AssetInventoryProps> = ({
                     onChange={(e) => setCriticality(e.target.value as Criticality)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
                   >
-                    <option value="CRITICAL">Critical</option>
-                    <option value="HIGH">High</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="LOW">Low</option>
+                    <option value="CRITICAL" className="bg-slate-900 text-slate-200">Critical</option>
+                    <option value="HIGH" className="bg-slate-900 text-slate-200">High</option>
+                    <option value="MEDIUM" className="bg-slate-900 text-slate-200">Medium</option>
+                    <option value="LOW" className="bg-slate-900 text-slate-200">Low</option>
                   </select>
                 </div>
               </div>

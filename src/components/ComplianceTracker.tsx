@@ -180,10 +180,10 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
               onChange={(e) => setSelectedStatusFilter(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500"
             >
-              <option value="ALL">All Statuses</option>
-              <option value="FULLY_IMPLEMENTED">Fully Implemented</option>
-              <option value="PARTIALLY_IMPLEMENTED">Partially Implemented</option>
-              <option value="NOT_IMPLEMENTED">Not Implemented</option>
+              <option value="ALL" className="bg-slate-900 text-slate-200">All Statuses</option>
+              <option value="FULLY_IMPLEMENTED" className="bg-slate-900 text-slate-200">Fully Implemented</option>
+              <option value="PARTIALLY_IMPLEMENTED" className="bg-slate-900 text-slate-200">Partially Implemented</option>
+              <option value="NOT_IMPLEMENTED" className="bg-slate-900 text-slate-200">Not Implemented</option>
             </select>
           </div>
         </div>
@@ -225,10 +225,10 @@ export const ComplianceTracker: React.FC<ComplianceTrackerProps> = ({
                           : "bg-rose-500/10 border-rose-500/40 text-rose-400"
                       }`}
                     >
-                      <option value="FULLY_IMPLEMENTED">Fully Implemented</option>
-                      <option value="PARTIALLY_IMPLEMENTED">Partially Implemented</option>
-                      <option value="NOT_IMPLEMENTED">Not Implemented</option>
-                      <option value="NOT_APPLICABLE">N/A (Not Applicable)</option>
+                      <option value="FULLY_IMPLEMENTED" className="bg-slate-900 text-slate-200">Fully Implemented</option>
+                      <option value="PARTIALLY_IMPLEMENTED" className="bg-slate-900 text-slate-200">Partially Implemented</option>
+                      <option value="NOT_IMPLEMENTED" className="bg-slate-900 text-slate-200">Not Implemented</option>
+                      <option value="NOT_APPLICABLE" className="bg-slate-900 text-slate-200">N/A (Not Applicable)</option>
                     </select>
 
                     <button

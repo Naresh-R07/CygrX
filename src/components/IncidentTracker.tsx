@@ -138,11 +138,11 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
               onChange={(e) => setSelectedSeverityFilter(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500"
             >
-              <option value="ALL">All Severities</option>
-              <option value="CRITICAL">Critical</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
+              <option value="ALL" className="bg-slate-900 text-slate-200">All Severities</option>
+              <option value="CRITICAL" className="bg-slate-900 text-slate-200">Critical</option>
+              <option value="HIGH" className="bg-slate-900 text-slate-200">High</option>
+              <option value="MEDIUM" className="bg-slate-900 text-slate-200">Medium</option>
+              <option value="LOW" className="bg-slate-900 text-slate-200">Low</option>
             </select>
           </div>
         </div>
@@ -175,11 +175,11 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                           : "bg-rose-500/10 border-rose-500/30 text-rose-300"
                       }`}
                     >
-                      <option value="NEW">NEW</option>
-                      <option value="INVESTIGATING">INVESTIGATING</option>
-                      <option value="CONTAINED">CONTAINED</option>
-                      <option value="ERADICATED">ERADICATED</option>
-                      <option value="CLOSED">CLOSED</option>
+                      <option value="NEW" className="bg-slate-900 text-slate-200">NEW</option>
+                      <option value="INVESTIGATING" className="bg-slate-900 text-slate-200">INVESTIGATING</option>
+                      <option value="CONTAINED" className="bg-slate-900 text-slate-200">CONTAINED</option>
+                      <option value="ERADICATED" className="bg-slate-900 text-slate-200">ERADICATED</option>
+                      <option value="CLOSED" className="bg-slate-900 text-slate-200">CLOSED</option>
                     </select>
                   </div>
                 </div>
@@ -259,10 +259,10 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                     onChange={(e) => setSeverity(e.target.value as IncidentSeverity)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-rose-500"
                   >
-                    <option value="CRITICAL">Critical</option>
-                    <option value="HIGH">High</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="LOW">Low</option>
+                    <option value="CRITICAL" className="bg-slate-900 text-slate-200">Critical</option>
+                    <option value="HIGH" className="bg-slate-900 text-slate-200">High</option>
+                    <option value="MEDIUM" className="bg-slate-900 text-slate-200">Medium</option>
+                    <option value="LOW" className="bg-slate-900 text-slate-200">Low</option>
                   </select>
                 </div>
 
@@ -273,9 +273,9 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({
                     onChange={(e) => setAssetId(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-rose-500"
                   >
-                    <option value="">-- Select Asset --</option>
+                    <option value="" className="bg-slate-900 text-slate-200">-- Select Asset --</option>
                     {assets.map((a) => (
-                      <option key={a.id} value={a.id}>
+                      <option key={a.id} value={a.id} className="bg-slate-900 text-slate-200">
                         {a.name}
                       </option>
                     ))}

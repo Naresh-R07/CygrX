@@ -33,11 +33,12 @@ function AppContent() {
   const [nistControls, setNistControls] = useState<Control[]>([]);
   const [evidences, setEvidences] = useState<Evidence[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
 
   const [isRiskModalOpen, setIsRiskModalOpen] = useState(false);
   const [editingRisk, setEditingRisk] = useState<Risk | null>(null);
   const [activeTargetRisk, setActiveTargetRisk] = useState<Risk | null>(null);
+  const [activeTargetControl, setActiveTargetControl] = useState<Control | null>(null);
 
   useEffect(() => {
     const handleResize = () => setViewport(getViewportDetails());
@@ -227,7 +228,7 @@ function AppContent() {
           isMobile={viewport.isMobile}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-x-hidden min-w-0 transition-all">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full overflow-x-hidden min-w-0 transition-all">
           {currentTab === "dashboard" && (
             <DashboardOverview risks={risks} assets={assets} isoControls={isoControls} nistControls={nistControls} incidents={incidents} onSelectTab={setCurrentTab} onSelectRisk={(risk) => { setEditingRisk(risk); setIsRiskModalOpen(true); }} onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }} />
           )}
@@ -235,10 +236,10 @@ function AppContent() {
             <RiskMatrixHeatmap risks={risks} onOpenNewRiskModal={() => { setEditingRisk(null); setIsRiskModalOpen(true); }} onSelectRisk={(risk) => { setEditingRisk(risk); setIsRiskModalOpen(true); }} onUpdateRiskStatus={handleUpdateRiskStatus} onRequestAiAdvice={handleRequestAiAdviceForRisk} />
           )}
           {currentTab === "compliance-iso" && (
-            <ComplianceTracker framework="ISO_27001" controls={isoControls} evidences={evidences} onUpdateControlStatus={handleUpdateIsoControlStatus} onRequestAiGapAnalysis={() => setCurrentTab("ai-advisor")} />
+            <ComplianceTracker framework="ISO_27001" controls={isoControls} evidences={evidences} onUpdateControlStatus={handleUpdateIsoControlStatus} onRequestAiGapAnalysis={(control) => { setActiveTargetControl(control); setCurrentTab("ai-advisor"); }} />
           )}
           {currentTab === "compliance-nist" && (
-            <ComplianceTracker framework="NIST_CSF_2" controls={nistControls} evidences={evidences} onUpdateControlStatus={handleUpdateNistControlStatus} onRequestAiGapAnalysis={() => setCurrentTab("ai-advisor")} />
+            <ComplianceTracker framework="NIST_CSF_2" controls={nistControls} evidences={evidences} onUpdateControlStatus={handleUpdateNistControlStatus} onRequestAiGapAnalysis={(control) => { setActiveTargetControl(control); setCurrentTab("ai-advisor"); }} />
           )}
           {currentTab === "assets" && (
             <AssetInventory assets={assets} onAddAsset={handleAddAsset} onDeleteAsset={handleDeleteAsset} />
@@ -250,7 +251,7 @@ function AppContent() {
             <IncidentTracker incidents={incidents} assets={assets} onAddIncident={handleAddIncident} onUpdateIncidentStatus={handleUpdateIncidentStatus} />
           )}
           {currentTab === "ai-advisor" && (
-            <AiSecurityAdvisor risks={risks} isoControls={isoControls} nistControls={nistControls} assets={assets} incidents={incidents} activeTargetRisk={activeTargetRisk} onClearTargetRisk={() => setActiveTargetRisk(null)} />
+            <AiSecurityAdvisor risks={risks} isoControls={isoControls} nistControls={nistControls} assets={assets} incidents={incidents} activeTargetRisk={activeTargetRisk} onClearTargetRisk={() => setActiveTargetRisk(null)} activeTargetControl={activeTargetControl} onClearTargetControl={() => setActiveTargetControl(null)} />
           )}
         </main>
       </div>

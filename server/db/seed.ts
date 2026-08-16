@@ -6,7 +6,7 @@ import path from "path";
 export function initDatabase(): void {
   const db = getDb();
 
-  const schemaPath = path.join(import.meta.dirname || process.cwd(), "server", "db", "schema.sql");
+  const schemaPath = path.join(import.meta.dirname || process.cwd(), "schema.sql");
   const schema = fs.readFileSync(schemaPath, "utf-8");
   db.exec(schema);
 

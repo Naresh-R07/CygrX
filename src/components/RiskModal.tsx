@@ -133,11 +133,11 @@ export const RiskModal: React.FC<RiskModalProps> = ({
                 onChange={(e) => setCategory(e.target.value as Risk["category"])}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
               >
-                <option value="Technical">Technical / Cyber</option>
-                <option value="Organizational">Organizational / Process</option>
-                <option value="Physical">Physical Security</option>
-                <option value="Legal/Compliance">Legal & Regulatory</option>
-                <option value="Third-Party">Third-Party & Vendor</option>
+                <option value="Technical" className="bg-slate-900 text-slate-200">Technical / Cyber</option>
+                <option value="Organizational" className="bg-slate-900 text-slate-200">Organizational / Process</option>
+                <option value="Physical" className="bg-slate-900 text-slate-200">Physical Security</option>
+                <option value="Legal/Compliance" className="bg-slate-900 text-slate-200">Legal & Regulatory</option>
+                <option value="Third-Party" className="bg-slate-900 text-slate-200">Third-Party & Vendor</option>
               </select>
             </div>
 
@@ -148,9 +148,9 @@ export const RiskModal: React.FC<RiskModalProps> = ({
                 onChange={(e) => setAssetId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
               >
-                <option value="">-- Select Asset (Optional) --</option>
+                <option value="" className="bg-slate-900 text-slate-200">-- Select Asset (Optional) --</option>
                 {assets.map((a) => (
-                  <option key={a.id} value={a.id}>
+                  <option key={a.id} value={a.id} className="bg-slate-900 text-slate-200">
                     {a.name} ({a.type})
                   </option>
                 ))}
@@ -161,7 +161,7 @@ export const RiskModal: React.FC<RiskModalProps> = ({
           {/* 5x5 Matrix Likelihood & Impact Sliders */}
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="font-bold text-slate-200">Dynamic 5x5 Severity Calculator</span>
+              <span className="font-bold text-slate-200">Dynamic Severity Calculator</span>
               <span className={`px-3 py-1 rounded-lg border text-xs font-bold ${scoreMeta.badgeBg}`}>
                 Score: {scoreMeta.score}/25 ({scoreMeta.level})
               </span>
@@ -226,11 +226,11 @@ export const RiskModal: React.FC<RiskModalProps> = ({
                 onChange={(e) => setStatus(e.target.value as RiskStatus)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500"
               >
-                <option value="OPEN">Open</option>
-                <option value="UNDER_REVIEW">Under Review</option>
-                <option value="MITIGATED">Mitigated</option>
-                <option value="ACCEPTED">Accepted</option>
-                <option value="TRANSFERRED">Transferred</option>
+                <option value="OPEN" className="bg-slate-900 text-slate-200">Open</option>
+                <option value="UNDER_REVIEW" className="bg-slate-900 text-slate-200">Under Review</option>
+                <option value="MITIGATED" className="bg-slate-900 text-slate-200">Mitigated</option>
+                <option value="ACCEPTED" className="bg-slate-900 text-slate-200">Accepted</option>
+                <option value="TRANSFERRED" className="bg-slate-900 text-slate-200">Transferred</option>
               </select>
             </div>
           </div>
