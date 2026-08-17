@@ -8,12 +8,10 @@ RUN apk add --no-cache \
     python3 \
     build-base \
     sqlite-dev \
-    linux-headers \
-    make \
-    g++
+    linux-headers
 
-# Ensure node-gyp finds python3
-RUN npm config set python /usr/bin/python3
+# Ensure node-gyp finds python3 via environment variable
+ENV PYTHON=/usr/bin/python3
 
 COPY package.json package-lock.json ./
 # Install all deps (including dev deps needed for the build)
