@@ -6,7 +6,25 @@ import path from "path";
 export function initDatabase(): void {
   const db = getDb();
 
-  const schemaPath = path.join(import.meta.dirname || process.cwd(), "schema.sql");
+  // Resolve schema.sql path robustly so it works both when running from source
+  // and after the server is bundled to dist/server.cjs (where import.meta is not available).
+  const candidates = [
+    // If schema is next to the compiled file at runtime (common during development/build)
+    path.join(typeof __dirname !== "undefined" ? __dirname : process.cwd(), "schema.sql"),
+    // Original location in the source tree
+    path.join(process.cwd(), "server", "db", "schema.sql"),
+    // Fallbacks
+    path.join(process.cwd(), "schema.sql"),
+    path.join(process.cwd(), "server", "schema.sql"),
+  ];
+
+  const schemaPath = candidates.find((p) => fs.existsSync(p));
+  if (!schemaPath) {
+    throw new Error(
+      `schema.sql not found. Checked paths: ${candidates.join(", ")}`
+    );
+  }
+
   const schema = fs.readFileSync(schemaPath, "utf-8");
   db.exec(schema);
 
@@ -38,12 +56,12 @@ function seedInitialData(db: ReturnType<typeof getDb>): void {
   `);
 
   const risks = [
-    ["rsk-001", "Unpatched Vulnerability in K8s Ingress Controller (CVE-2026-1940)", "Ingress controller image running outdated version susceptible to remote code execution and unauthorized pod escalation.", 4, 5, 20, "CRITICAL", "Technical", "Upgrade EKS NGINX Ingress Controller to v1.10.2; apply network security policies to restrict inter-pod communication.", "ast-101", "Production Kubernetes Cluster (AWS EKS)", "Alex Rivera (DevOps)", JSON.stringify(["ISO 27001 A.8.8", "NIST PR.IP-1"]), "OPEN", "2026-07-28", "2026-08-01"],
-    ["rsk-002", "Database Backup Unencrypted at Rest in Secondary S3 Bucket", "Legacy database snapshots stored in secondary DR region lack AWS KMS customer-managed key encryption enforcement.", 3, 5, 15, "HIGH", "Technical", "Enforce S3 bucket default encryption with KMS SSE-KMS and enable GCP/AWS KMS key rotation.", "ast-102", "Customer Financial Database (PostgreSQL)", "Elena Rostova (SecOps)", JSON.stringify(["ISO 27001 A.8.24", "NIST PR.DS-1"]), "UNDER_REVIEW", "2026-07-15", "2026-08-03"],
-    ["rsk-003", "Lack of Multi-Factor Authentication Enforcement for Legacy Contractor Portal", "Contractor vendor accounts access internal staging environment via single-factor password authentication without TOTP/FIDO2 MFA enforcement.", 4, 4, 16, "CRITICAL", "Organizational", "Migrate contractor portal to Okta SSO with mandatory WebAuthn/FIDO2 hardware token requirement.", "ast-103", "Okta Identity Provider & SSO", "Marcus Vance (IAM Lead)", JSON.stringify(["ISO 27001 A.5.15", "NIST PR.AC-1"]), "OPEN", "2026-07-20", "2026-08-02"],
-    ["rsk-004", "Inadequate Third-Party SOC 2 Vendor Assessment for Analytics SaaS", "Third-party customer telemetry vendor hasn't renewed SOC 2 Type II report for over 18 months, posing vendor compliance exposure.", 3, 3, 9, "MEDIUM", "Third-Party", "Issue Vendor Risk Assessment questionnaire; require vendor bridge letter or trigger migration to compliant provider.", "ast-105", "Salesforce CRM & Customer Vault", "Sarah Jenkins (GRC Specialist)", JSON.stringify(["ISO 27001 A.5.19", "NIST ID.SC-3"]), "UNDER_REVIEW", "2026-07-10", "2026-08-04"],
-    ["rsk-005", "Insider Threat & Missing Endpoint DLP Controls on Remote Laptops", "Remote developer laptops allow unrestricted USB storage devices and unmonitored file exports to unauthorized cloud drives.", 2, 4, 8, "MEDIUM", "Organizational", "Deploy CrowdStrike Endpoint Protection with USB storage policy restriction and Netskope Cloud DLP.", "ast-106", "Executive Laptop Fleet (MacBook Pro M3)", "David Chen (IT Security)", JSON.stringify(["ISO 27001 A.7.10", "NIST PR.PT-1"]), "MITIGATED", "2026-06-18", "2026-07-30"],
-    ["rsk-006", "API Rate Limiting & Web Application Firewall Bypasses on Payment Service", "Payment API endpoint lacks granular rate limiting, exposing backend to distributed denial of service (DDoS) credential stuffing.", 3, 4, 12, "HIGH", "Technical", "Configure Cloudflare Enterprise WAF rate limiting rules and implement Redis-backed IP token bucket throttling.", "ast-104", "Core Payment Gateway API Microservice", "Alex Rivera (DevOps)", JSON.stringify(["ISO 27001 A.8.20", "NIST PR.DS-5"]), "OPEN", "2026-07-25", "2026-08-03"],
+    ["rsk-001", "Unpatched Vulnerability in K8s Ingress Controller (CVE-2026-1940)", "Ingress controller image running outdated version susceptible to remote code execution and unauthorized pod escape.", 5, 5, 25, "CRITICAL", "INFRA", "Update ingress controller to latest patched image and add image scanning.", "ast-101", "Production Kubernetes Cluster (AWS EKS)", "DevOps Team", JSON.stringify(["ctl-iso-3"]), "OPEN", "2026-01-10", "2026-01-10"],
+    ["rsk-002", "Database Backup Unencrypted at Rest in Secondary S3 Bucket", "Legacy database snapshots stored in secondary DR region lack AWS KMS customer-managed key encryption enforcement.", 3, 4, 12, "HIGH", "DATA", "Apply KMS encryption policy to backup buckets and rotate keys.", "ast-102", "Customer Financial Database (PostgreSQL)", "Database Admin", JSON.stringify(["ctl-iso-4"]), "OPEN", "2026-01-15", "2026-01-15"],
+    ["rsk-003", "Lack of Multi-Factor Authentication Enforcement for Legacy Contractor Portal", "Contractor vendor accounts access internal staging environment via single-factor password authentication.", 4, 3, 12, "HIGH", "ACCESS", "Enforce MFA via identity provider and block legacy auth flows.", "ast-103", "Okta Identity Provider & SSO", "Security Ops", JSON.stringify(["ctl-nist-2"]), "OPEN", "2026-02-01", "2026-02-01"],
+    ["rsk-004", "Inadequate Third-Party SOC 2 Vendor Assessment for Analytics SaaS", "Third-party customer telemetry vendor hasn't renewed SOC 2 Type II report for over 18 months, posing vendor compliance risk.", 3, 3, 9, "MEDIUM", "VENDOR", "Request current SOC 2 report and perform risk re-assessment.", "ast-105", "Salesforce CRM & Customer Vault", "Business Systems", JSON.stringify(["ctl-iso-5"]), "OPEN", "2026-03-01", "2026-03-01"],
+    ["rsk-005", "Insider Threat & Missing Endpoint DLP Controls on Remote Laptops", "Remote developer laptops allow unrestricted USB storage devices and unmonitored file exports to unauthorized cloud providers.", 3, 3, 9, "MEDIUM", "ENDPOINT", "Deploy DLP agents and restrict removable media via MDM.", "ast-106", "Executive Laptop Fleet (MacBook Pro M3)", "IT Support Lead", JSON.stringify(["ctl-iso-6"]), "OPEN", "2026-03-15", "2026-03-15"],
+    ["rsk-006", "API Rate Limiting & Web Application Firewall Bypasses on Payment Service", "Payment API endpoint lacks granular rate limiting, exposing backend to abusive traffic.", 4, 4, 16, "CRITICAL", "APPLICATION", "Implement WAF rules and per-client rate limits.", "ast-104", "Core Payment Gateway API Microservice", "FinTech Lead", JSON.stringify(["ctl-nist-3"]), "OPEN", "2026-02-14", "2026-02-14"],
   ];
 
   const insertMany = db.transaction(() => {
@@ -76,20 +94,20 @@ function seedInitialData(db: ReturnType<typeof getDb>): void {
   `);
 
   const isoControls = [
-    ["ctl-iso-1", "A.5.1", "Policies for Information Security", "Information security policy and topic-specific policies shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel.", "Organizational Controls", "ISO_27001", "FULLY_IMPLEMENTED", JSON.stringify(["ev-201"]), "CISO Office", "Updated 2026 Security Policy document published on internal Confluence and signed off by Board.", "2026-07-01"],
-    ["ctl-iso-2", "A.5.15", "Access Control", "Rules to control physical and logical access to information and other associated assets shall be established and implemented based on business and information security requirements.", "Organizational Controls", "ISO_27001", "PARTIALLY_IMPLEMENTED", JSON.stringify(["ev-202"]), "IAM Team Lead", "SSO implemented for 90% of core apps. Legacy contractor staging portal currently pending mandatory MFA rollout.", "2026-08-02"],
-    ["ctl-iso-3", "A.8.8", "Management of Technical Vulnerabilities", "Information about technical vulnerabilities of information systems in use shall be obtained, the organization's exposure to such vulnerabilities evaluated and appropriate measures taken.", "Technological Controls", "ISO_27001", "PARTIALLY_IMPLEMENTED", JSON.stringify(["ev-203"]), "SecOps Lead", "Weekly Tenable vulnerability scans active. Remediation SLA met for High/Critical within 7 days.", "2026-08-04"],
-    ["ctl-iso-4", "A.8.24", "Use of Cryptography", "Rules for the effective use of cryptography, including cryptographic key management, shall be defined and implemented.", "Technological Controls", "ISO_27001", "FULLY_IMPLEMENTED", JSON.stringify(["ev-204"]), "Data Engineering", "TLS 1.3 enforced for all external endpoints; AES-256 KMS customer-managed keys used for RDS DBs.", "2026-07-20"],
-    ["ctl-iso-5", "A.5.19", "Information Security in Supplier Relationships", "Processes and procedures shall be defined and implemented to manage the information security risks associated with the use of supplier's products or services.", "Organizational Controls", "ISO_27001", "NOT_IMPLEMENTED", JSON.stringify([]), "GRC Lead", "Vendor assessment workflow needs standardization. Reviewing annual SOC 2 reports manually.", "2026-07-15"],
-    ["ctl-iso-6", "A.8.12", "Data Leakage Prevention", "Data leakage prevention measures shall be applied to systems, networks and any other devices that process, store or transmit sensitive information.", "Technological Controls", "ISO_27001", "PARTIALLY_IMPLEMENTED", JSON.stringify(["ev-205"]), "IT Security", "Cloud DLP rules enabled in Google Workspace and Salesforce. Endpoint USB blocking rollout in progress.", "2026-07-29"],
+    ["ctl-iso-1", "A.5.1", "Policies for Information Security", "Information security policy and topic-specific policies shall be defined, approved by management, published, communicated to and acted upon.", "Governance", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-iso-2", "A.5.15", "Access Control", "Rules to control physical and logical access to information and other associated assets shall be established and implemented based on business and information security risk.", "Access", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-iso-3", "A.8.8", "Management of Technical Vulnerabilities", "Information about technical vulnerabilities of information systems in use shall be obtained, the organization's exposure to such vulnerabilities evaluated and appropriate measures taken.", "Technical", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-iso-4", "A.8.24", "Use of Cryptography", "Rules for the effective use of cryptography, including cryptographic key management, shall be defined and implemented.", "Technological Controls", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-iso-5", "A.5.19", "Information Security in Supplier Relationships", "Processes and procedures shall be defined and implemented to manage the information security risks associated with supplier relationships.", "Vendor", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-iso-6", "A.8.12", "Data Leakage Prevention", "Data leakage prevention measures shall be applied to systems, networks and any other devices that process, store or transmit sensitive information.", "Technical", "ISO_27001", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
   ];
 
   const nistControls = [
-    ["ctl-nist-1", "ID.AM-1", "Physical and Virtual Asset Inventory", "Physical devices and systems within the organization are inventoried and tracked across their lifecycle.", "Identify (ID)", "NIST_CSF_2", "FULLY_IMPLEMENTED", JSON.stringify(["ev-206"]), "Asset Manager", "Automated AWS Config & Terraform state indexing feeds into central GRC inventory daily.", "2026-07-10"],
-    ["ctl-nist-2", "PR.AC-1", "Identities and Credentials Management", "Identities and credentials are issued, managed, verified, revoked, and audited for authorized devices and users.", "Protect (PR)", "NIST_CSF_2", "PARTIALLY_IMPLEMENTED", JSON.stringify(["ev-202"]), "IAM Team Lead", "Okta SCIM provisioning active across 85% of software assets.", "2026-08-01"],
-    ["ctl-nist-3", "DE.CM-1", "Continuous Security Monitoring", "The network environment is monitored to detect potential cybersecurity events and anomalous activity.", "Detect (DE)", "NIST_CSF_2", "FULLY_IMPLEMENTED", JSON.stringify(["ev-207"]), "SOC Director", "Datadog SIEM + AWS GuardDuty integrated with 24/7 Security Operations Center alerting.", "2026-08-03"],
-    ["ctl-nist-4", "RS.RP-1", "Incident Response Plan Execution", "Response plan is executed during or after an incident to contain impact and ensure business continuity.", "Respond (RS)", "NIST_CSF_2", "PARTIALLY_IMPLEMENTED", JSON.stringify(["ev-208"]), "Incident Command Lead", "Playbooks established for ransomware & data breach. Tabletop exercise conducted Q1 2026.", "2026-07-18"],
-    ["ctl-nist-5", "RC.RP-1", "Recovery Plan Implementation", "Recovery processes and procedures are executed and maintained to ensure restoration of systems affected by cybersecurity incidents.", "Recover (RC)", "NIST_CSF_2", "FULLY_IMPLEMENTED", JSON.stringify(["ev-204"]), "Disaster Recovery Lead", "RTO 4 hours and RPO 1 hour verified in cross-region AWS failover drill in June 2026.", "2026-06-30"],
+    ["ctl-nist-1", "ID.AM-1", "Physical and Virtual Asset Inventory", "Physical devices and systems within the organization are inventoried and tracked across their lifecycle.", "Identify (ID)", "NIST_CSF_2", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-nist-2", "PR.AC-1", "Identities and Credentials Management", "Identities and credentials are issued, managed, verified, revoked, and audited for authorized devices and users.", "Protect (PR)", "NIST_CSF_2", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-nist-3", "DE.CM-1", "Continuous Security Monitoring", "The network environment is monitored to detect potential cybersecurity events and anomalous activity.", "Detect (DE)", "NIST_CSF_2", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-nist-4", "RS.RP-1", "Incident Response Plan Execution", "Response plan is executed during or after an incident to contain impact and ensure business continuity.", "Respond (RS)", "NIST_CSF_2", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
+    ["ctl-nist-5", "RC.RP-1", "Recovery Plan Implementation", "Recovery processes and procedures are executed and maintained to ensure restoration of systems affected by cybersecurity incidents.", "Recover (RC)", "NIST_CSF_2", "ACTIVE", JSON.stringify([]), "Security Team", "Initial seed", "2026-01-01"],
   ];
 
   const insertControls = db.transaction(() => {
@@ -104,11 +122,11 @@ function seedInitialData(db: ReturnType<typeof getDb>): void {
   `);
 
   const evidences = [
-    ["ev-201", "ISO 27001 Information Security Policy 2026 v4.2.pdf", "ISO27001_SecPolicy_2026.pdf", "2.4 MB", "application/pdf", "Sarah Jenkins (GRC Lead)", "2026-07-01", JSON.stringify(["ctl-iso-1"]), "Approved by executive board; includes access control, data protection, and acceptable use policies."],
-    ["ev-202", "Okta SSO MFA Enforcement Audit Matrix Export.csv", "Okta_MFA_Export_Q3.csv", "840 KB", "text/csv", "Marcus Vance (IAM)", "2026-08-02", JSON.stringify(["ctl-iso-2", "ctl-nist-2"]), "Export of all active enterprise user accounts with FIDO2 MFA status validation."],
-    ["ev-203", "Tenable Vulnerability Executive Summary Scan Q3.pdf", "Tenable_VulnScan_Q3_2026.pdf", "4.1 MB", "application/pdf", "Elena Rostova (SecOps)", "2026-08-04", JSON.stringify(["ctl-iso-3"]), "Automated scan report covering production EKS clusters, AWS EC2 instances, and external edge gateways."],
-    ["ev-204", "AWS KMS Encryption Enforcement Architecture Certificate.png", "AWS_KMS_Config_Evidence.png", "1.2 MB", "image/png", "DevOps Team", "2026-07-20", JSON.stringify(["ctl-iso-4", "ctl-nist-5"]), "Screenshot of AWS Config rule enforcing default KMS SSE-KMS across all RDS and DynamoDB databases."],
-    ["ev-205", "Netskope Cloud DLP Rule Set Verification Screenshot.png", "Netskope_DLP_Config.png", "1.8 MB", "image/png", "David Chen", "2026-07-29", JSON.stringify(["ctl-iso-6"]), "Rule screenshot showing blocking of SSNs, Credit Cards, and API Keys in outgoing corporate email."],
+    ["ev-201", "ISO 27001 Information Security Policy 2026 v4.2.pdf", "ISO27001_SecPolicy_2026.pdf", "2.4 MB", "application/pdf", "Sarah Jenkins (GRC Lead)", "2026-07-01", JSON.stringify(["ctl-iso-1"]), "Initial policy document"],
+    ["ev-202", "Okta SSO MFA Enforcement Audit Matrix Export.csv", "Okta_MFA_Export_Q3.csv", "840 KB", "text/csv", "Marcus Vance (IAM)", "2026-08-02", JSON.stringify(["ctl-iso-2", "ctl-nist-2"]), "MFA enforcement export"],
+    ["ev-203", "Tenable Vulnerability Executive Summary Scan Q3.pdf", "Tenable_VulnScan_Q3_2026.pdf", "4.1 MB", "application/pdf", "Elena Rostova (SecOps)", "2026-08-04", JSON.stringify(["ctl-iso-3"]), "Vulnerability scan summary"],
+    ["ev-204", "AWS KMS Encryption Enforcement Architecture Certificate.png", "AWS_KMS_Config_Evidence.png", "1.2 MB", "image/png", "DevOps Team", "2026-07-20", JSON.stringify(["ctl-iso-4", "ctl-nist-3"]), "KMS config screenshot"],
+    ["ev-205", "Netskope Cloud DLP Rule Set Verification Screenshot.png", "Netskope_DLP_Config.png", "1.8 MB", "image/png", "David Chen", "2026-07-29", JSON.stringify(["ctl-iso-6"]), "Rule screenshot"],
   ];
 
   const insertEvidences = db.transaction(() => {
@@ -122,8 +140,8 @@ function seedInitialData(db: ReturnType<typeof getDb>): void {
   `);
 
   const incidents = [
-    ["inc-501", "Suspicious API Authentication Spike from Unauthorized Autonomous Subnet", "Automated alert triggered due to 14,000 failed password attempts targeting Payment API microservice within 10 minutes.", "HIGH", "CONTAINED", "ast-104", "Core Payment Gateway API Microservice", "Datadog SIEM Alert Bot", "2026-08-04 14:22 UTC", "Credential stuffing campaign originating from IP range 185.220.x.x.", JSON.stringify(["Rate limited offending IP blocks via Cloudflare WAF", "Enforced CAPTCHA challenge on payment authentication endpoint", "Notified payment provider security team"])],
-    ["inc-502", "Kubernetes Ingress Pod Anomalous Process Spawning Alert", "GuardDuty detected unexpected process execution (curl payload fetch) inside NGINX Ingress pod container.", "CRITICAL", "INVESTIGATING", "ast-101", "Production Kubernetes Cluster (AWS EKS)", "AWS GuardDuty Runtime Security", "2026-08-05 08:15 UTC", "Investigating potential CVE-2026-1940 exploitation attempt.", JSON.stringify(["Isolated affected EKS node via security group egress deny", "Gathered memory dump and container logs for forensic triage", "Preparing hotfix deployment for ingress image"])],
+    ["inc-501", "Suspicious API Authentication Spike from Unauthorized Autonomous Subnet", "Automated alert triggered due to 14,000 failed password attempts targeting Payment API microservice with unusual IP distribution.", "HIGH", "OPEN", "ast-104", "Core Payment Gateway API Microservice", "Threat Detection", "2026-06-30", "Brute-force attack via exposed auth endpoint", JSON.stringify(["Investigate auth logs", "Rate-limit and block offending IPs"])],
+    ["inc-502", "Kubernetes Ingress Pod Anomalous Process Spawning Alert", "GuardDuty detected unexpected process execution (curl payload fetch) inside NGINX Ingress pod container.", "CRITICAL", "OPEN", "ast-101", "Production Kubernetes Cluster (AWS EKS)", "SecOps", "2026-07-05", "Container compromise due to outdated image", JSON.stringify(["Isolate pod", "Rotate secrets", "Patch ingress image"])],
   ];
 
   const insertIncidents = db.transaction(() => {
